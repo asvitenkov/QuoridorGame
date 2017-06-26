@@ -12,7 +12,7 @@
 #define HLINE_BEGIN       LINE_BEGIN
 #define HLINE_END         LINE_END
 #define VLINE_BEGIN       ((unsigned char) (LINE_BEGIN << 4))
-#define VLINE_BEGIN       ((unsigned char) (LINE_END << 4))
+#define VLINE_END         ((unsigned char) (LINE_END << 4))
 
 
 typedef enum{
@@ -25,18 +25,19 @@ typedef enum{
 
 #pragma pack(push, 1)
 
+
 typedef struct
 {
-    unsigned x : 4;
-    unsigned y : 4;
-    unsigned borderCount : 4;
-    unsigned finishPosition : 2;
+    unsigned char x : 2;
+    unsigned char y : 2;
+    unsigned char borderCount : 2;
+    unsigned char finishPosition : 2;
 } PlayerData;
 
 typedef struct
 {
     unsigned char playground[LINES_MAX_COUNT][LINE_MAX_LENGHT];
-    PlayerData players[PLAYER_COUNT];
+    PlayerData players[PLAYER_COUNT]; // First player is main player for processing
 } GameData;
 
 #pragma pack(pop)
