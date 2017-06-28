@@ -16,7 +16,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    structures.cpp
+    structures.cpp \
+    datautils.cpp
 
 HEADERS += \
-    structures.h
+    structures.h \
+    datautils.h \
+    defines.h

@@ -1,19 +1,7 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-
-#define LINES_MAX_COUNT   7
-#define LINE_MAX_LENGHT   9
-#define PLAYER_COUNT      4
-
-#define LINE_BEGIN
-#define LINE_END
-
-#define HLINE_BEGIN       LINE_BEGIN
-#define HLINE_END         LINE_END
-#define VLINE_BEGIN       ((unsigned char) (LINE_BEGIN << 4))
-#define VLINE_END         ((unsigned char) (LINE_END << 4))
-
+#include "defines.h"
 
 typedef enum{
     FinishPosotionTop       = 0,
@@ -36,7 +24,23 @@ typedef struct
 
 typedef struct
 {
-    unsigned char playground[LINES_MAX_COUNT][LINE_MAX_LENGHT];
+    unsigned char lines[PLAYGROUND_LINES_DATA_ARRAY_SIZE];
+} PlaygroundLinesData;
+
+typedef struct
+{
+    PlaygroundLinesData vLines;
+} PlaygroundVLinesData;
+
+typedef struct
+{
+    PlaygroundLinesData hLines;
+} PlaygroundHLinesData;
+
+typedef struct
+{
+    PlaygroundHLinesData dataHLines;
+    PlaygroundVLinesData dataVLines;
     PlayerData players[PLAYER_COUNT]; // First player is main player for processing
 } GameData;
 
