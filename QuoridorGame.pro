@@ -8,6 +8,12 @@ QT       += core
 
 QT       -= gui
 
+
+
+#DEFINES += NO_DEBUG_PRINT QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+
+
+
 TARGET = QuoridorGame
 CONFIG   += console
 CONFIG   -= app_bundle
@@ -25,3 +31,4 @@ HEADERS += \
     datautils.h \
     defines.h \
     gamedatahash.h
+

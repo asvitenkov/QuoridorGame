@@ -16,6 +16,11 @@ typedef enum{
 
 typedef struct
 {
+    enum { PlayerCount = PLAYER_COUNT };
+} PlayerDataDefines;
+
+typedef struct
+{
     unsigned char x : 2;
     unsigned char y : 2;
     unsigned char borderCount : 2;
@@ -24,24 +29,34 @@ typedef struct
 
 typedef struct
 {
-    unsigned char lines[PLAYGROUND_LINES_DATA_ARRAY_SIZE];
+    enum
+    {
+        ArraySize    = PLAYGROUND_LINES_DATA_ARRAY_SIZE,
+        LinesCount   = PLAYGROUND_LINES_MAX_COUNT,
+        LineLength   = PLAYGROUND_LINE_MAX_LENGHT,
+        ItemsPerByte = PLAYGROUND_LINES_DATA_ITEMS_PER_BYTE,
+        ItemBitSize  = PLAYGROUND_LINES_ITEM_BIT_SIZE
+    };
+} PlaygroundLinesDataDefines;
+
+typedef struct
+{
+    unsigned char lines[PlaygroundLinesDataDefines::ArraySize];
 } PlaygroundLinesData;
+
 
 typedef struct
 {
     PlaygroundLinesData vLines;
-} PlaygroundVLinesData;
-
-typedef struct
-{
     PlaygroundLinesData hLines;
-} PlaygroundHLinesData;
+} PlaygroundData;
+
+
 
 typedef struct
 {
-    PlaygroundHLinesData dataHLines;
-    PlaygroundVLinesData dataVLines;
-    PlayerData players[PLAYER_COUNT]; // First player is main player for processing
+    PlaygroundData playground;
+    PlayerData players[PlayerDataDefines::PlayerCount]; // First player is main player for processing
 } GameData;
 
 
