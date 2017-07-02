@@ -1,5 +1,7 @@
 #include "datautils.h"
 
+#include <memory>
+
 
 bool CPlaygroundLinesData::getPos(unsigned char x, unsigned char y, unsigned int &i, unsigned int &j)
 {
@@ -81,4 +83,16 @@ void CPlaygroundLinesData::setValue(PlaygroundLinesData *data, unsigned char x, 
 
         setRawByteValue(data, i, itemRawData);
     }
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+
+GameData* CGameData::createGameData()
+{
+    GameData *ptr = new GameData;
+
+    memset(ptr, 0, sizeof(GameData));
+
+    return ptr;
 }

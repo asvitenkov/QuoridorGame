@@ -17,9 +17,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     structures.cpp \
-    datautils.cpp
+    datautils.cpp \
+    gamedatahash.cpp
 
 HEADERS += \
     structures.h \
     datautils.h \
-    defines.h
+    defines.h \
+    gamedatahash.h

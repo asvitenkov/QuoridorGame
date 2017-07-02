@@ -21,5 +21,10 @@ private:
 };
 
 
+class CGameData
+{
+public:
+    static GameData* createGameData();
+};
 
 #endif // DATAUTILS_H

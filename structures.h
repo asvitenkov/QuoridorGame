@@ -44,6 +44,7 @@ typedef struct
     PlayerData players[PLAYER_COUNT]; // First player is main player for processing
 } GameData;
 
+
 #pragma pack(pop)
 
 #endif // STRUCTURES_H
