@@ -146,7 +146,7 @@ unsigned char CPlaygroundLinesData::setByteItemValue(unsigned char byte, unsigne
 
 CPlaygroundLinesData::CPlaygroundLinesData(PlaygroundLinesData *data)
 {
-    memset(&m_playground, 0, sizeof(m_playground));
+    memset(&m_linesData, 0, sizeof(m_linesData));
 
     if (data != 0)
     {
@@ -164,14 +164,35 @@ CPlaygroundLinesData::CPlaygroundLinesData(PlaygroundLinesData *data)
 
                 const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
 
-                m_playground[x][y] = itemValue;
+                m_linesData[x][y] = itemValue;
             }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////
 
-GameData* CGameData::createGameData()
+CPlayerData::CPlayerData(PlayerData* data)
+    : m_x(data->x)
+    , m_y(data->y)
+    , m_borderCount(data->borderCount)
+    , m_finishPosition(static_cast<FinishPosition>(data->finishPosition))
+{
+    Q_CHECK_PTR(data);
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+
+CPlaygroundData::CPlaygroundData(PlaygroundData *data)
+    : m_hLines(&data->hLines)
+    , m_vLines(&data->vLines)
+{
+    Q_CHECK_PTR(data);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+GameData* CGameData::createGameDataStructure()
 {
     GameData *ptr = new GameData;
 

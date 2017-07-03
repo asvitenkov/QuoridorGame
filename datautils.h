@@ -3,7 +3,6 @@
 
 #include "structures.h"
 
-
 class CPlaygroundLinesData
 {
 public:
@@ -26,20 +25,46 @@ private:
     /// \param itemIndex - value index
     /// \return
     ///
-public:
     static unsigned char byteItemValue(unsigned char byte, unsigned char itemIndex);
     static unsigned char setByteItemValue(unsigned char byte, unsigned char itemValue, unsigned char itemIndex);
 
 
-    unsigned char m_playground[PLAYGROUND_LINES_MAX_COUNT][PLAYGROUND_LINE_MAX_LENGHT];
+    unsigned char m_linesData[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
 };
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+class CPlayerData
+{
+public:
+    CPlayerData(PlayerData* data);
+private:
+    int m_x;
+    int m_y;
+    size_t m_borderCount;
+    FinishPosition m_finishPosition;
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+class CPlaygroundData
+{
+public:
+    CPlaygroundData(PlaygroundData *data);
+private:
+    CPlaygroundLinesData m_hLines;
+    CPlaygroundLinesData m_vLines;
+};
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 class CGameData
 {
 public:
-    static GameData* createGameData();
+    static GameData* createGameDataStructure();
+
+private:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
