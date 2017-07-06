@@ -79,15 +79,6 @@ unsigned char CPlaygroundLinesData::value(PlaygroundLinesData *data, unsigned ch
 
     if (bRes)
     {
-//        unsigned char itemRawData = rawByteValue(data, i);
-//        const unsigned char valueByteMask = mask(j);
-
-//        itemRawData = itemRawData & valueByteMask;
-
-//        itemRawData = itemRawData >> (j * PLAYGROUND_LINES_ITEM_BIT_SIZE);
-
-//        value = itemRawData;
-
         const unsigned char itemRawData = rawByteValue(data, i);
 
         value = byteItemValue(itemRawData, j);
@@ -105,16 +96,6 @@ void CPlaygroundLinesData::setValue(PlaygroundLinesData *data, unsigned char x, 
 
     if (bRes)
     {
-//        const unsigned char valueByteMask = mask(j);
-//        const unsigned char newValueShifted = (value & ~(0xFF << PLAYGROUND_LINES_ITEM_BIT_SIZE)) << (j * PLAYGROUND_LINES_ITEM_BIT_SIZE);
-
-//        unsigned char itemRawData = rawByteValue(data, i);
-
-//        itemRawData = itemRawData & ~valueByteMask;
-//        itemRawData = itemRawData | newValueShifted;
-
-//        setRawByteValue(data, i, itemRawData);
-
         const unsigned char itemRawData = rawByteValue(data, i);
         const unsigned char newItemRawData = setByteItemValue(itemRawData, value, j);
 

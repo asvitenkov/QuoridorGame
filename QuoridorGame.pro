@@ -30,5 +30,6 @@ HEADERS += \
     structures.h \
     datautils.h \
     defines.h \
-    gamedatahash.h
+    gamedatahash.h \
+    datautilsinl.h
 
