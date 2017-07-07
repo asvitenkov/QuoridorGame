@@ -1,13 +1,12 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#define PLAYGROUND_LINES_MAX_COUNT   7
+#define PLAYGROUND_LINES_MAX_COUNT   8
 #define PLAYGROUND_LINE_MAX_LENGHT   9
 #define PLAYER_COUNT                 4
 
 #define LINE_EMPTY        0
 #define LINE_BEGIN        1
-#define LINE_END          2
 
 #define PLAYGROUND_LINES_DATA_ITEMS_PER_BYTE   8
 #define PLAYGROUND_LINES_ITEM_BIT_SIZE        (8 / PLAYGROUND_LINES_DATA_ITEMS_PER_BYTE)
@@ -19,6 +18,5 @@
 
 #include <QDebug>
 
-#
 
 #endif // DEFINES_H

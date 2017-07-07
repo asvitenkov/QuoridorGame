@@ -59,6 +59,42 @@ typedef struct
     PlayerData players[PlayerDataDefines::PlayerCount]; // First player is main player for processing
 } GameData;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+/// additional structures
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef struct
+{
+    unsigned char x : 4;
+    unsigned char y : 4;
+} PointData;
+
+
+typedef struct
+{
+    typedef enum
+    {
+        moveTop           = 0,
+        moveBottom        = 1,
+        moveLeft          = 2,
+        moveRight         = 3,
+        addVerticalLine   = 4,
+        addHorizontalLine = 5,
+    } PlayerActionType;
+
+    unsigned char type;
+} PlayerAction;
+
+typedef struct
+{
+    PlayerAction action;
+} PlayerActionMove;
+
+typedef struct
+{
+    PlayerAction action;
+    PointData    point;
+} PlayerActionAdd;
 
 #pragma pack(pop)
 

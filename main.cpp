@@ -14,6 +14,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    GameData *game = CGameData::createGameDataStructure();
+
+    std::list<PlayerActionAdd*> actions;
+
+    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, actions);
 
 
     return 0;

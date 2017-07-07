@@ -131,8 +131,95 @@ inline void setValue(PlaygroundLinesData *data, unsigned char x, unsigned char y
 }
 
 
+///
+/// \brief getAvaliableBorderPosition check borders position for pair <V,H> or <H,V> as you pass
+/// \param first  lines array to set borders
+/// \param second lines array to check borders
+///
+inline void getAvaliableBorderPosition(PlaygroundLinesData *first, PlaygroundLinesData *second, std::list<PointData> &positions)
+{
+    Q_CHECK_PTR(first);
+    Q_CHECK_PTR(second);
+
+    for (unsigned char x = 0; x < PlaygroundLinesDataDefines::LinesCount; x++)
+        for (unsigned char y = 0; y < (PlaygroundLinesDataDefines::LineLength - 1); y++)
+        {
+            // check if first[x,y] and first[x, y + 1] is empty
+            // and if second[y,x] is empty (no orthogonal border)
+            if (PlaygroundLinesDataInl::value(first, x, y) == LINE_EMPTY
+                    && PlaygroundLinesDataInl::value(first, x, y + 1) == LINE_EMPTY
+                    && PlaygroundLinesDataInl::value(second, y, x) == LINE_EMPTY)
+            {
+                PointData point = {x,y};
+                positions.push_back(point);
+            }
+        }
 }
 
+
+}
+
+
+namespace PlaygroundDataInl
+{
+
+inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAdd*> &actions)
+{
+    Q_CHECK_PTR(data);
+
+    std::list<PointData> verticalBorderPositions, horizontalBorderPositions;
+
+    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->vLines, &data->hLines, verticalBorderPositions);
+    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->hLines, &data->vLines, horizontalBorderPositions);
+
+    std::list<PointData>::iterator it;
+
+    it = horizontalBorderPositions.begin();
+
+    while (it != horizontalBorderPositions.end())
+    {
+        PlayerActionAdd *item = new PlayerActionAdd;
+        item->action.type = PlayerAction::addHorizontalLine;
+        item->point = *it;
+
+        actions.push_back(item);
+        ++it;
+    }
+
+    it = verticalBorderPositions.begin();
+
+    while (it != verticalBorderPositions.end())
+    {
+        PlayerActionAdd *item = new PlayerActionAdd;
+        item->action.type = PlayerAction::addVerticalLine;
+        item->point = *it;
+
+        actions.push_back(item);
+        ++it;
+    }
+
+
+}
+
+}
+
+namespace  GameDataInl
+{
+
+
+
+inline void getAvaliableMoovments(GameData *data, uint player)
+{
+    Q_CHECK_PTR(data);
+
+    if (!(player < PlayerDataDefines::PlayerCount))
+        return;
+
+
+}
+
+
+}
 
 #endif // DATAUTILSINL
 
