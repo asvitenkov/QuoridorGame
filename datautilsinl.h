@@ -171,7 +171,8 @@ inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, P
         array[i] = PlaygroundLinesDataInl::rawByteValue(data, i);
 
     for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
-        for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength; y++)
+        for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength - 1; y++)
+            // -1 because we store only the beginning point of the border
         {
             const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
             const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
@@ -179,7 +180,10 @@ inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, P
 
             const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
 
-            map.lines[x][y] = itemValue;
+            map.lines[x][y] |= itemValue;
+
+            if (itemValue != 0)
+                map.lines[x][y + 1] = itemValue;
         }
 
 }
@@ -273,8 +277,8 @@ inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(map);
-    Q_ASSERT_X(x > PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
-    Q_ASSERT_X(y > PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(x >=0 && x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y >=0 && y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
 #endif
 
     const int d = positive ? 1 : -1;
@@ -296,16 +300,16 @@ inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned
     {
         // horizontal moovment
         // check vertical lines
-        if ((dx > 0 && map->verticalBorderMap.lines[x][y] != 0)
-                || (dx < 0 && map->verticalBorderMap.lines[x - 1][y] != 0))
+        if ((dx > 0 && map->verticalBorderMap.lines[x][y] == 0)
+                || (dx < 0 && map->verticalBorderMap.lines[x - 1][y] == 0))
             result = true;
     }
     else
     {
         // vertical moovment
         // check horizontal line
-        if ((dy > 0 && map->horizontalBorderMap.lines[y][x] != 0)
-                || (dx < 0 && map->horizontalBorderMap.lines[y - 1][x] != 0))
+        if ((dy > 0 && map->horizontalBorderMap.lines[y][x] == 0)
+                || (dx < 0 && map->horizontalBorderMap.lines[y - 1][x] == 0))
             result = true;
     }
 
