@@ -1,4 +1,5 @@
 #include "searchalg.h"
+#include "datautilsinl.h"
 
 #include <QtGlobal>
 
@@ -7,8 +8,8 @@ namespace SearchAlg
 
 typedef struct
 {
-    char x : 4;
-    char y : 4;
+    char x;
+    char y;
 } FinistPointData;
 
 
@@ -20,12 +21,14 @@ static FinistPointData gFinistPointDataArray[4] = {
     {0, -1}
 };
 
+typedef unsigned char PlaygroundStepsMap[PlaygroundLinesDataDefines::PlaygroundSize][PlaygroundLinesDataDefines::PlaygroundSize];
 
-bool checkFinishRouteRecursive(PlaygroundData *data, unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundBorderMap *map)
+
+bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundBorderMap *map, unsigned int stepsCount, PlaygroundStepsMap &stepsMap)
 {
 
 #ifdef ENABLE_PARAMS_CHECKING
-    Q_CHECK_PTR(data);
+    Q_CHECK_PTR(stepsMap);
     Q_CHECK_PTR(map);
 
     if (finishPosition < FinishPositionFirst || finishPosition > FinishPositionLast)
@@ -37,18 +40,45 @@ bool checkFinishRouteRecursive(PlaygroundData *data, unsigned char x, unsigned c
 
     const FinistPointData &finishPointData = gFinistPointDataArray[static_cast<size_t>(finishPosition)];
 
+    if (x == finishPointData.x || y == finishPointData.y)
+        return true;
 
+    if (stepsMap[x][y] <= stepsCount)
+        return false;
 
+    stepsMap[x][y] = stepsCount;
 
+    bool bRes = false;
+
+    if (!bRes && y - 1 >= 0 && stepsMap[x][y - 1] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, false, false))
+        bRes = checkFinishRouteRecursive(x, y - 1, finishPosition, map, stepsCount + 1, stepsMap);
+
+    if (!bRes && y + 1 < PlaygroundLinesDataDefines::PlaygroundSize
+            && stepsMap[x][y + 1] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, false, true))
+        bRes = checkFinishRouteRecursive(x, y + 1, finishPosition, map, stepsCount + 1, stepsMap);
+
+    if (!bRes && x - 1 >=0 && stepsMap[x - 1][y] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, true, false))
+        bRes = checkFinishRouteRecursive(x - 1, y, finishPosition, map, stepsCount + 1, stepsMap);
+
+    if (!bRes && x + 1 < PlaygroundLinesDataDefines::PlaygroundSize
+            && stepsMap[x + 1][y] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, true, true))
+        bRes = checkFinishRouteRecursive(x + 1, y, finishPosition, map, stepsCount + 1, stepsMap);
+
+    return bRes;
 }
 
 
-bool checkFinishRoute(PlaygroundData *data, PointData *point, FinishPosition finishPosition)
+bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, FinishPosition finishPosition)
 {
 
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);
-    Q_CHECK_PTR(point);
+    Q_ASSERT_X(x >=0 && x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y >=0 && y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
 
     if (finishPosition < FinishPositionFirst || finishPosition > FinishPositionLast)
     {
@@ -57,10 +87,35 @@ bool checkFinishRoute(PlaygroundData *data, PointData *point, FinishPosition fin
     }
 #endif
 
-    PlaygroundBorderMap map;
-    memset(&map, 255, sizeof(PlaygroundBorderMap));
+    PlaygroundBorderMap *map = PlaygroundDataInl::convertToPlaygroundBorderMap(data);
 
-    return true;
+    static PlaygroundStepsMap stepsMap;
+    memset(&stepsMap, 255, sizeof(PlaygroundStepsMap));
+
+    bool bRes = false;
+
+    bRes = checkFinishRouteRecursive(x, y, finishPosition, map, 0, stepsMap);
+
+    QString str;
+
+    for (int i = 0; i < 9; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            unsigned char value = stepsMap[j][i];
+
+            if (value < 10)  str += " ";
+            if (value < 100) str += " ";
+            str += QString::number(value) + " ";
+        }
+        qDebug() << str;
+        str = "";
+    }
+
+
+
+
+    return bRes;
 }
 
 

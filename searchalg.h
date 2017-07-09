@@ -6,7 +6,7 @@
 namespace SearchAlg
 {
 
-bool checkFinishRoute(PlaygroundData *data, PointData *point, FinishPosition finishPosition);
+bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, FinishPosition finishPosition);
 
 }
 

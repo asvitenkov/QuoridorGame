@@ -17,16 +17,25 @@ int main(int argc, char *argv[])
 
     GameData *game = CGameData::createGameDataStructure();
 
-    std::list<PlayerActionAdd*> actions;
+//    std::list<PlayerActionAdd*> actions;
+//    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, actions);
+//    PointData point;
+//    point.x = 4;
+//    point.y = 0;
+//    SearchAlg::checkFinishRoute(&game->playground, &point, FinishPosotionBottom);
 
-    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, actions);
+
+    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 3, 1);
+    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 5, 1);
+    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 4, 7, 1);
+    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 4, 5, 1);
+
+    PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 2, 0, 1);
+    PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 2, 2, 1);
+    //PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 4, 2, 1);
 
 
-    PointData point;
-    point.x = 4;
-    point.y = 0;
-
-    SearchAlg::checkFinishRoute(&game->playground, &point, FinishPosotionBottom);
+    SearchAlg::checkFinishRoute(&game->playground, 4, 0, FinishPosotionBottom);
 
     return 0;
 }
