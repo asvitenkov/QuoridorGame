@@ -125,30 +125,30 @@ unsigned char CPlaygroundLinesData::setByteItemValue(unsigned char byte, unsigne
 }
 
 
-CPlaygroundLinesData::CPlaygroundLinesData(PlaygroundLinesData *data)
-{
-    memset(&m_linesData, 0, sizeof(m_linesData));
+//CPlaygroundLinesData::CPlaygroundLinesData(PlaygroundLinesData *data)
+//{
+//    memset(&m_linesData, 0, sizeof(m_linesData));
 
-    if (data != 0)
-    {
-        unsigned char array[PlaygroundLinesDataDefines::ArraySize] = {0};
+//    if (data != 0)
+//    {
+//        unsigned char array[PlaygroundLinesDataDefines::ArraySize] = {0};
 
-        for (size_t i = 0; i < PlaygroundLinesDataDefines::ArraySize; i++)
-            array[i] = CPlaygroundLinesData::rawByteValue(data, i);
+//        for (size_t i = 0; i < PlaygroundLinesDataDefines::ArraySize; i++)
+//            array[i] = CPlaygroundLinesData::rawByteValue(data, i);
 
-        for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
-            for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength; y++)
-            {
-                const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
-                const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
-                const unsigned char byteItemIndex = index % PlaygroundLinesDataDefines::ItemsPerByte;
+//        for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
+//            for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength; y++)
+//            {
+//                const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
+//                const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
+//                const unsigned char byteItemIndex = index % PlaygroundLinesDataDefines::ItemsPerByte;
 
-                const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
+//                const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
 
-                m_linesData[x][y] = itemValue;
-            }
-    }
-}
+//                m_linesData[x][y] = itemValue;
+//            }
+//    }
+//}
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -164,12 +164,12 @@ CPlayerData::CPlayerData(PlayerData* data)
 
 ////////////////////////////////////////////////////////////////////////////
 
-CPlaygroundData::CPlaygroundData(PlaygroundData *data)
-    : m_hLines(&data->hLines)
-    , m_vLines(&data->vLines)
-{
-    Q_CHECK_PTR(data);
-}
+//CPlaygroundData::CPlaygroundData(PlaygroundData *data)
+//    : m_hLines(&data->horizontalLines)
+//    , m_vLines(&data->verticalLines)
+//{
+//    Q_CHECK_PTR(data);
+//}
 
 ////////////////////////////////////////////////////////////////////////////
 

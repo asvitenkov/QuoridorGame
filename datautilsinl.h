@@ -40,7 +40,7 @@ inline void setRawByteValue(PlaygroundLinesData *data, unsigned int index, unsig
     }
 }
 
-inline unsigned char rawByteValue(PlaygroundLinesData *data, unsigned int index)
+inline unsigned char rawByteValue(const PlaygroundLinesData *data, unsigned int index)
 {
     Q_CHECK_PTR(data);
 
@@ -157,11 +157,55 @@ inline void getAvaliableBorderPosition(PlaygroundLinesData *first, PlaygroundLin
 }
 
 
+inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, PlaygroundLinesBorderMap &map)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+#endif
+
+    memset(&map, 0, sizeof(PlaygroundLinesBorderMap));
+
+    unsigned char array[PlaygroundLinesDataDefines::ArraySize] = {0};
+
+    for (size_t i = 0; i < PlaygroundLinesDataDefines::ArraySize; i++)
+        array[i] = PlaygroundLinesDataInl::rawByteValue(data, i);
+
+    for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
+        for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength; y++)
+        {
+            const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
+            const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
+            const unsigned char byteItemIndex = index % PlaygroundLinesDataDefines::ItemsPerByte;
+
+            const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
+
+            map.lines[x][y] = itemValue;
+        }
+
 }
+
+} // namespace PlaygroundLinesDataInl
 
 
 namespace PlaygroundDataInl
 {
+
+inline PlaygroundBorderMap* convertToPlaygroundBorderMap(PlaygroundData *data)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+#endif
+
+    PlaygroundBorderMap *map = new PlaygroundBorderMap;
+    memset(map, 0, sizeof(PlaygroundBorderMap));
+
+
+    PlaygroundLinesDataInl::convertToPlaygroundLinesBorderMap(&data->horizontalLines, map->horizontalBorderMap);
+    PlaygroundLinesDataInl::convertToPlaygroundLinesBorderMap(&data->verticalLines, map->verticalBorderMap);
+
+    return map;
+}
+
 
 inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAdd*> &actions)
 {
@@ -169,8 +213,8 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
 
     std::list<PointData> verticalBorderPositions, horizontalBorderPositions;
 
-    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->vLines, &data->hLines, verticalBorderPositions);
-    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->hLines, &data->vLines, horizontalBorderPositions);
+    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->verticalLines, &data->horizontalLines, verticalBorderPositions);
+    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->horizontalLines, &data->verticalLines, horizontalBorderPositions);
 
     std::list<PointData>::iterator it;
 
@@ -201,9 +245,9 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
 
 }
 
-}
+} // namespace PlaygroundDataInl
 
-namespace  GameDataInl
+namespace GameDataInl
 {
 
 
@@ -219,7 +263,56 @@ inline void getAvaliableMoovments(GameData *data, uint player)
 }
 
 
+} //namespace GameDataInl
+
+
+namespace PlaygroundBorderMapInl
+{
+
+inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned char y, bool horizontal, bool positive)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(map);
+    Q_ASSERT_X(x > PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y > PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+#endif
+
+    const int d = positive ? 1 : -1;
+    const int dx = horizontal ? d : 0;
+    const int dy = horizontal ? 0 : d;
+
+    const int newX = x + dx;
+    const int newY = y + dy;
+
+    if (newX < 0 || newX >= PlaygroundLinesDataDefines::PlaygroundSize)
+        return false;
+
+    if (newY < 0 || newY >= PlaygroundLinesDataDefines::PlaygroundSize)
+        return false;
+
+    bool result = false;
+
+    if (dx != 0)
+    {
+        // horizontal moovment
+        // check vertical lines
+        if ((dx > 0 && map->verticalBorderMap.lines[x][y] != 0)
+                || (dx < 0 && map->verticalBorderMap.lines[x - 1][y] != 0))
+            result = true;
+    }
+    else
+    {
+        // vertical moovment
+        // check horizontal line
+        if ((dy > 0 && map->horizontalBorderMap.lines[y][x] != 0)
+                || (dx < 0 && map->horizontalBorderMap.lines[y - 1][x] != 0))
+            result = true;
+    }
+
+    return result;
 }
+
+} //namespace PlaygroundBorderMapInl
 
 #endif // DATAUTILSINL
 

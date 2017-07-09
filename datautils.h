@@ -6,7 +6,7 @@
 class CPlaygroundLinesData
 {
 public:
-    CPlaygroundLinesData(PlaygroundLinesData *data = 0);
+    //CPlaygroundLinesData(PlaygroundLinesData *data = 0);
 
 
     static unsigned char value(PlaygroundLinesData *data, unsigned char x, unsigned char y);
@@ -29,7 +29,7 @@ private:
     static unsigned char setByteItemValue(unsigned char byte, unsigned char itemValue, unsigned char itemIndex);
 
 
-    unsigned char m_linesData[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
+    //unsigned char m_linesData[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
 };
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,14 +47,14 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class CPlaygroundData
-{
-public:
-    CPlaygroundData(PlaygroundData *data);
-private:
-    CPlaygroundLinesData m_hLines;
-    CPlaygroundLinesData m_vLines;
-};
+//class CPlaygroundData
+//{
+//public:
+//    CPlaygroundData(PlaygroundData *data);
+//private:
+//    CPlaygroundLinesData m_hLines;
+//    CPlaygroundLinesData m_vLines;
+//};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////

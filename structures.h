@@ -3,11 +3,17 @@
 
 #include "defines.h"
 
+
+// if you would like to change order of values or values
+// change gFinistPointDataArray from "searchalg.cpp"
 typedef enum{
     FinishPosotionTop       = 0,
     FinishPosotionRight     = 1,
-    FinishPosotionTopBottom = 2,
-    FinishPosotionTopLeft   = 3,
+    FinishPosotionBottom    = 2,
+    FinishPosotionLeft      = 3,
+
+    FinishPositionFirst     = FinishPosotionTop,
+    FinishPositionLast      = FinishPosotionLeft
 } FinishPosition;
 
 
@@ -31,14 +37,16 @@ typedef struct
 {
     enum
     {
-        ArraySize    = PLAYGROUND_LINES_DATA_ARRAY_SIZE,
-        LinesCount   = PLAYGROUND_LINES_MAX_COUNT,
-        LineLength   = PLAYGROUND_LINE_MAX_LENGHT,
-        ItemsPerByte = PLAYGROUND_LINES_DATA_ITEMS_PER_BYTE,
-        ItemBitSize  = PLAYGROUND_LINES_ITEM_BIT_SIZE
+        ArraySize      = PLAYGROUND_LINES_DATA_ARRAY_SIZE,
+        LinesCount     = PLAYGROUND_LINES_COUNT,
+        LineLength     = PLAYGROUND_LINE_LENGHT,
+        ItemsPerByte   = PLAYGROUND_LINES_DATA_ITEMS_PER_BYTE,
+        ItemBitSize    = PLAYGROUND_LINES_ITEM_BIT_SIZE,
+        PlaygroundSize = PLAYGROUND_SIZE
     };
 } PlaygroundLinesDataDefines;
 
+// We store in array only border begin position
 typedef struct
 {
     unsigned char lines[PlaygroundLinesDataDefines::ArraySize];
@@ -47,8 +55,8 @@ typedef struct
 
 typedef struct
 {
-    PlaygroundLinesData vLines;
-    PlaygroundLinesData hLines;
+    PlaygroundLinesData verticalLines;
+    PlaygroundLinesData horizontalLines;
 } PlaygroundData;
 
 
@@ -95,6 +103,18 @@ typedef struct
     PlayerAction action;
     PointData    point;
 } PlayerActionAdd;
+
+
+typedef struct
+{
+    unsigned char lines[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
+} PlaygroundLinesBorderMap;
+
+typedef struct
+{
+    PlaygroundLinesBorderMap verticalBorderMap;
+    PlaygroundLinesBorderMap horizontalBorderMap;
+} PlaygroundBorderMap;
 
 #pragma pack(pop)
 

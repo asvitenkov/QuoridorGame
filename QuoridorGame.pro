@@ -24,12 +24,14 @@ TEMPLATE = app
 SOURCES += main.cpp \
     structures.cpp \
     datautils.cpp \
-    gamedatahash.cpp
+    gamedatahash.cpp \
+    searchalg.cpp
 
 HEADERS += \
     structures.h \
     datautils.h \
     defines.h \
     gamedatahash.h \
-    datautilsinl.h
+    datautilsinl.h \
+    searchalg.h
 

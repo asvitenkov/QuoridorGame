@@ -8,6 +8,7 @@
 
 #include "gamedatahash.h"
 #include "datautilsinl.h"
+#include "searchalg.h"
 
 
 int main(int argc, char *argv[])
@@ -20,6 +21,12 @@ int main(int argc, char *argv[])
 
     PlaygroundDataInl::getAvaliableBorderActions(&game->playground, actions);
 
+
+    PointData point;
+    point.x = 4;
+    point.y = 0;
+
+    SearchAlg::checkFinishRoute(&game->playground, &point, FinishPosotionBottom);
 
     return 0;
 }
