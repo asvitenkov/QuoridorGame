@@ -116,6 +116,12 @@ typedef struct
     PlaygroundLinesBorderMap horizontalBorderMap;
 } PlaygroundBorderMap;
 
+
+typedef struct
+{
+    unsigned char map[PlaygroundLinesDataDefines::PlaygroundSize][PlaygroundLinesDataDefines::PlaygroundSize];
+} PlaygroundCellsMap;
+
 #pragma pack(pop)
 
 #endif // STRUCTURES_H

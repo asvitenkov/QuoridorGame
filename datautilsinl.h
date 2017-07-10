@@ -277,8 +277,8 @@ inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(map);
-    Q_ASSERT_X(x >=0 && x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
-    Q_ASSERT_X(y >=0 && y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
 #endif
 
     const int d = positive ? 1 : -1;
@@ -309,7 +309,7 @@ inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned
         // vertical moovment
         // check horizontal line
         if ((dy > 0 && map->horizontalBorderMap.lines[y][x] == 0)
-                || (dx < 0 && map->horizontalBorderMap.lines[y - 1][x] == 0))
+                || (dy < 0 && map->horizontalBorderMap.lines[y - 1][x] == 0))
             result = true;
     }
 

@@ -1,7 +1,13 @@
 #include "searchalg.h"
 #include "datautilsinl.h"
 
+#include "playgroundwidget.h"
+
 #include <QtGlobal>
+
+//delete me
+#include <QMessageBox>
+CPlaygroundWidget *gWidget = NULL;
 
 namespace SearchAlg
 {
@@ -21,15 +27,12 @@ static FinistPointData gFinistPointDataArray[4] = {
     {0, -1}
 };
 
-typedef unsigned char PlaygroundStepsMap[PlaygroundLinesDataDefines::PlaygroundSize][PlaygroundLinesDataDefines::PlaygroundSize];
 
-
-bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundBorderMap *map, unsigned int stepsCount, PlaygroundStepsMap &stepsMap)
+bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundBorderMap *borderMap, unsigned int stepsCount, PlaygroundCellsMap &stepsMap)
 {
 
 #ifdef ENABLE_PARAMS_CHECKING
-    Q_CHECK_PTR(stepsMap);
-    Q_CHECK_PTR(map);
+    Q_CHECK_PTR(borderMap);
 
     if (finishPosition < FinishPositionFirst || finishPosition > FinishPositionLast)
     {
@@ -40,33 +43,43 @@ bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition 
 
     const FinistPointData &finishPointData = gFinistPointDataArray[static_cast<size_t>(finishPosition)];
 
+//    if (stepsMap.map[x][y] <= stepsCount)
+//        return false;
+
+    stepsMap.map[x][y] = stepsCount;
+
+    // delete me only for testing
+    gWidget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
+    QMessageBox msgBox;
+    msgBox.setText("The document has been modified.");
+    msgBox.exec();
+
     if (x == finishPointData.x || y == finishPointData.y)
         return true;
 
-    if (stepsMap[x][y] <= stepsCount)
-        return false;
-
-    stepsMap[x][y] = stepsCount;
-
     bool bRes = false;
 
-    if (!bRes && y - 1 >= 0 && stepsMap[x][y - 1] > stepsCount + 1
-            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, false, false))
-        bRes = checkFinishRouteRecursive(x, y - 1, finishPosition, map, stepsCount + 1, stepsMap);
+    // up
+    if (!bRes && y - 1 >= 0 && stepsMap.map[x][y - 1] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(borderMap, x, y, false, false))
+        bRes = checkFinishRouteRecursive(x, y - 1, finishPosition, borderMap, stepsCount + 1, stepsMap);
 
-    if (!bRes && y + 1 < PlaygroundLinesDataDefines::PlaygroundSize
-            && stepsMap[x][y + 1] > stepsCount + 1
-            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, false, true))
-        bRes = checkFinishRouteRecursive(x, y + 1, finishPosition, map, stepsCount + 1, stepsMap);
-
-    if (!bRes && x - 1 >=0 && stepsMap[x - 1][y] > stepsCount + 1
-            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, true, false))
-        bRes = checkFinishRouteRecursive(x - 1, y, finishPosition, map, stepsCount + 1, stepsMap);
-
+    // right
     if (!bRes && x + 1 < PlaygroundLinesDataDefines::PlaygroundSize
-            && stepsMap[x + 1][y] > stepsCount + 1
-            && PlaygroundBorderMapInl::canPlayerMooveTo(map, x, y, true, true))
-        bRes = checkFinishRouteRecursive(x + 1, y, finishPosition, map, stepsCount + 1, stepsMap);
+            && stepsMap.map[x + 1][y] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(borderMap, x, y, true, true))
+        bRes = checkFinishRouteRecursive(x + 1, y, finishPosition, borderMap, stepsCount + 1, stepsMap);
+
+    // down
+    if (!bRes && y + 1 < PlaygroundLinesDataDefines::PlaygroundSize
+            && stepsMap.map[x][y + 1] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(borderMap, x, y, false, true))
+        bRes = checkFinishRouteRecursive(x, y + 1, finishPosition, borderMap, stepsCount + 1, stepsMap);
+
+    // left
+    if (!bRes && x - 1 >=0 && stepsMap.map[x - 1][y] > stepsCount + 1
+            && PlaygroundBorderMapInl::canPlayerMooveTo(borderMap, x, y, true, false))
+        bRes = checkFinishRouteRecursive(x - 1, y, finishPosition, borderMap, stepsCount + 1, stepsMap);
 
     return bRes;
 }
@@ -77,42 +90,28 @@ bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, Fi
 
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);
-    Q_ASSERT_X(x >=0 && x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
-    Q_ASSERT_X(y >=0 && y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
-
-    if (finishPosition < FinishPositionFirst || finishPosition > FinishPositionLast)
-    {
-        qCritical() << "SearchAlg::checkFinishRoute error: finishPosition is out of range - " << (unsigned char) finishPosition;
-        return false;
-    }
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(finishPosition >= FinishPositionFirst && finishPosition <= FinishPositionLast, "SearchAlg::checkFinishRoute", QString("finishPosition is out of range: %1").arg(static_cast<size_t>(finishPosition)).toStdString().c_str());
 #endif
 
-    PlaygroundBorderMap *map = PlaygroundDataInl::convertToPlaygroundBorderMap(data);
+    PlaygroundBorderMap *borderMap = PlaygroundDataInl::convertToPlaygroundBorderMap(data);
 
-    static PlaygroundStepsMap stepsMap;
-    memset(&stepsMap, 255, sizeof(PlaygroundStepsMap));
+    static PlaygroundCellsMap stepsMap;
+    memset(&stepsMap, 255, sizeof(PlaygroundCellsMap));
 
     bool bRes = false;
 
-    bRes = checkFinishRouteRecursive(x, y, finishPosition, map, 0, stepsMap);
+    // delete me only for testing
+    gWidget = new CPlaygroundWidget(0);
+    gWidget->show();
 
-    QString str;
+    bRes = checkFinishRouteRecursive(x, y, finishPosition, borderMap, 0, stepsMap);
 
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 9; j++)
-        {
-            unsigned char value = stepsMap[j][i];
-
-            if (value < 10)  str += " ";
-            if (value < 100) str += " ";
-            str += QString::number(value) + " ";
-        }
-        qDebug() << str;
-        str = "";
-    }
-
-
+    //delete me
+    CPlaygroundWidget *widget = new CPlaygroundWidget(0);
+    widget->show();
+    widget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
 
 
     return bRes;
