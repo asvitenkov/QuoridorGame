@@ -6,8 +6,8 @@
 #include <QtGlobal>
 
 //delete me
-#include <QMessageBox>
-CPlaygroundWidget *gWidget = NULL;
+//#include <QMessageBox>
+//CPlaygroundWidget *gWidget = NULL;
 
 namespace SearchAlg
 {
@@ -49,10 +49,10 @@ bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition 
     stepsMap.map[x][y] = stepsCount;
 
     // delete me only for testing
-    gWidget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
-    QMessageBox msgBox;
-    msgBox.setText("The document has been modified.");
-    msgBox.exec();
+//    gWidget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
+//    QMessageBox msgBox;
+//    msgBox.setText("The document has been modified.");
+//    msgBox.exec();
 
     if (x == finishPointData.x || y == finishPointData.y)
         return true;
@@ -103,15 +103,15 @@ bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, Fi
     bool bRes = false;
 
     // delete me only for testing
-    gWidget = new CPlaygroundWidget(0);
-    gWidget->show();
+//    gWidget = new CPlaygroundWidget(0);
+//    gWidget->show();
 
     bRes = checkFinishRouteRecursive(x, y, finishPosition, borderMap, 0, stepsMap);
 
     //delete me
-    CPlaygroundWidget *widget = new CPlaygroundWidget(0);
-    widget->show();
-    widget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
+//    CPlaygroundWidget *widget = new CPlaygroundWidget(0);
+//    widget->show();
+//    widget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
 
 
     return bRes;

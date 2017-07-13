@@ -91,17 +91,18 @@ typedef struct
     } PlayerActionType;
 
     unsigned char type;
-} PlayerAction;
+} IPlayerAction;
+
 
 typedef struct
 {
-    PlayerAction action;
+    IPlayerAction action;
 } PlayerActionMove;
 
 typedef struct
 {
-    PlayerAction action;
-    PointData    point;
+    IPlayerAction action;
+    PointData     point;
 } PlayerActionAdd;
 
 

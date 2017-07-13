@@ -25,6 +25,16 @@ int main(int argc, char *argv[])
 //    point.y = 0;
 //    SearchAlg::checkFinishRoute(&game->playground, &point, FinishPosotionBottom);
 
+    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,true,true);
+    PlaygroundLinesDataInl::changeBorder(&game->playground.verticalLines, 0, 0, true);
+    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,true,true);
+
+
+
+    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,false,true);
+    PlaygroundLinesDataInl::changeBorder(&game->playground.horizontalLines, 0, 0, true);
+    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,false,true);
+
 
     PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 0, 1);
     PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 2, 1);

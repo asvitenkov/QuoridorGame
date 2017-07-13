@@ -188,6 +188,21 @@ inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, P
 
 }
 
+inline void changeBorder(PlaygroundLinesData *data, unsigned char x, unsigned char y, bool addBorder)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::LinesCount, "PlaygroundLinesDataInl::changeBorder", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    // -1 because we can't add border to the last cell
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::LineLength - 1, "PlaygroundLinesDataInl::changeBorder", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+#endif
+
+    const unsigned char value = addBorder ? 1 : 0;
+
+    // we store only start border point
+    PlaygroundLinesDataInl::setValue(data, x, y, value);
+}
+
 } // namespace PlaygroundLinesDataInl
 
 
@@ -227,7 +242,7 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
     while (it != horizontalBorderPositions.end())
     {
         PlayerActionAdd *item = new PlayerActionAdd;
-        item->action.type = PlayerAction::addHorizontalLine;
+        item->action.type = IPlayerAction::addHorizontalLine;
         item->point = *it;
 
         actions.push_back(item);
@@ -239,14 +254,86 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
     while (it != verticalBorderPositions.end())
     {
         PlayerActionAdd *item = new PlayerActionAdd;
-        item->action.type = PlayerAction::addVerticalLine;
+        item->action.type = IPlayerAction::addVerticalLine;
         item->point = *it;
 
         actions.push_back(item);
         ++it;
     }
+}
 
 
+inline bool canPlayerMooveTo(PlaygroundData *data, unsigned char x, unsigned char y, bool horizontal, bool positive)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundDataInl::canPlayerMooveTo", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundDataInl::canPlayerMooveTo", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+#endif
+
+    const int d = positive ? 1 : -1;
+    const int dx = horizontal ? d : 0;
+    const int dy = horizontal ? 0 : d;
+
+    const int newX = x + dx;
+    const int newY = y + dy;
+
+    if (newX < 0 || newX >= PlaygroundLinesDataDefines::PlaygroundSize)
+        return false;
+
+    if (newY < 0 || newY >= PlaygroundLinesDataDefines::PlaygroundSize)
+        return false;
+
+    bool result = false;
+
+    // in PlaygroundLinesData stored information only about the start point of border
+    // we mush check 2 states - border starts between two cells (x,y) or border start between previous point
+    !!! implement normal solution
+
+    if (dx != 0)
+    {
+        // horizontal moovment
+        // check vertical lines
+
+        if ((dx > 0 && PlaygroundLinesDataInl::value(&data->verticalLines, x, y) == 0)
+                || (dx < 0 && PlaygroundLinesDataInl::value(&data->verticalLines, x - 1, y) == 0))
+            result = true;
+
+//        if ((dx > 0 && map->verticalBorderMap.lines[x][y] == 0)
+//                || (dx < 0 && map->verticalBorderMap.lines[x - 1][y] == 0))
+//            result = true;
+    }
+    else
+    {
+        // vertical moovment
+        // check horizontal line
+        if ((dy > 0 && PlaygroundLinesDataInl::value(&data->horizontalLines, y, x) == 0)
+                || (dy < 0 && PlaygroundLinesDataInl::value(&data->horizontalLines, y - 1, x) == 0))
+            result = true;
+    }
+
+    return result;
+}
+
+
+inline void addVerticalBorder(PlaygroundData *data, unsigned char x, unsigned char y)
+{
+    PlaygroundLinesDataInl::changeBorder(&data->verticalLines, x, y, true);
+}
+
+inline void removeVerticalBorder(PlaygroundData *data, unsigned char x, unsigned char y)
+{
+    PlaygroundLinesDataInl::changeBorder(&data->verticalLines, x, y, false);
+}
+
+inline void addHorizontalBorder(PlaygroundData *data, unsigned char x, unsigned char y)
+{
+    PlaygroundLinesDataInl::changeBorder(&data->horizontalLines, x, y, true);
+}
+
+inline void removeHorizontalBorder(PlaygroundData *data, unsigned char x, unsigned char y)
+{
+    PlaygroundLinesDataInl::changeBorder(&data->horizontalLines, x, y, false);
 }
 
 } // namespace PlaygroundDataInl
@@ -256,13 +343,16 @@ namespace GameDataInl
 
 
 
-inline void getAvaliableMoovments(GameData *data, uint player)
+inline void getAvaliablePlayerActions(GameData *data, uint player)
 {
     Q_CHECK_PTR(data);
 
     if (!(player < PlayerDataDefines::PlayerCount))
         return;
 
+    std::list<PlayerActionAdd*> borderActions;
+
+    PlaygroundDataInl::getAvaliableBorderActions(&data->playground, borderActions);
 
 }
 
@@ -277,8 +367,8 @@ inline bool canPlayerMooveTo(PlaygroundBorderMap *map, unsigned char x, unsigned
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(map);
-    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
-    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMoove", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMooveTo", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "PlaygroundBorderMapInl::canPlayerMooveTo", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
 #endif
 
     const int d = positive ? 1 : -1;
