@@ -21,7 +21,8 @@ public:
     explicit CPlaygroundWidget(QWidget *parent = 0);
     ~CPlaygroundWidget();
 
-    void showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundBorderMap *borderMap, PlaygroundCellsMap *stepsMap);
+    void showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap);
+    void showAvaliableBorderPosition(PlaygroundData *playgroundData, const std::list<PlayerActionAdd*> &actions);
 
 private:
     enum Defines
@@ -48,6 +49,10 @@ private:
 
     void addHorizontalBorder(unsigned char x, unsigned char y);
     void addVerticalBorder(unsigned char x, unsigned char y);
+
+    void setHorizontalBorderStyle(unsigned char x, unsigned char y, QColor color = QColor());
+    void setVerticalBorderStyle(unsigned char x, unsigned char y, QColor color = QColor());
+
     void setCellText(const QString &str, unsigned char x, unsigned char y);
     void setCellColor(const QColor &color, unsigned char x, unsigned char y);
     void setCellStyle(unsigned char x, unsigned char y, QColor color = QColor(), int border = -1, QColor borderColor = QColor());
@@ -58,6 +63,8 @@ private:
     void addPlayer(unsigned char x, unsigned char y, FinishPosition position);
 
     void resetPlayground();
+
+    void readBordersFromPlaygroundData(PlaygroundData *data);
 
     static bool checkCellCoordinates(unsigned char x, unsigned char y);
     static bool checkBorderCoordinates(unsigned char x, unsigned char y);

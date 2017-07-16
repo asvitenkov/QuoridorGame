@@ -18,61 +18,61 @@ int main(int argc, char *argv[])
 
     GameData *game = CGameData::createGameDataStructure();
 
-//    std::list<PlayerActionAdd*> actions;
-//    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, actions);
-//    PointData point;
-//    point.x = 4;
-//    point.y = 0;
-//    SearchAlg::checkFinishRoute(&game->playground, &point, FinishPosotionBottom);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 0);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 2);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 4);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 6);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 5);
 
-    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,true,true);
-    PlaygroundLinesDataInl::changeBorder(&game->playground.verticalLines, 0, 0, true);
-    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,true,true);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 1, 1);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 1, 3);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 1, 5);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 1, 7);
 
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 2, 0);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 2, 2);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 2, 4);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 2, 6);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 2, 5);
 
-
-    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,false,true);
-    PlaygroundLinesDataInl::changeBorder(&game->playground.horizontalLines, 0, 0, true);
-    PlaygroundDataInl::canPlayerMooveTo(&game->playground,0,0,false,true);
-
-
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 0, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 2, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 4, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 6, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 0, 5, 1);
-
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 1, 1, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 1, 3, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 1, 5, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 1, 7, 1);
-
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 2, 0, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 2, 2, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 2, 4, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 2, 6, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 2, 5, 1);
-
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 3, 1, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 3, 3, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 3, 5, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 3, 7, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 3, 7, 1);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 3, 1);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 3, 3);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 3, 5);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 3, 7);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 3, 7);
 
 
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 6, 0, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 6, 2, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 7, 3, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.horizontalLines, 7, 1, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 2, 4, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 4, 6, 1);
-    PlaygroundLinesDataInl::setValue(&game->playground.verticalLines, 0, 7, 1);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 6, 0);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 6, 2);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 7, 1);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 7, 3);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 7, 5);
+//    PlaygroundDataInl::addHorizontalBorder(&game->playground, 7, 7);
+//    PlaygroundDataInl::addVerticalBorder(&game->playground, 2, 4);
+//    PlaygroundDataInl::addVerticalBorder(&game->playground, 4, 6);
+
+    PlaygroundDataInl::addHorizontalBorder(&game->playground, 5, 7);
+    PlaygroundDataInl::addVerticalBorder(&game->playground, 6, 5);
 
 
-    SearchAlg::checkFinishRoute(&game->playground, 4, 0, FinishPosotionBottom);
+    //SearchAlg::checkFinishRoute(&game->playground, 4, 0, FinishPosotionBottom);
+
+
+    GameDataInl::getAvaliablePlayerActions(game, 0);
+
 
 //    CPlaygroundWidget widget;
 //    widget.show();
+
+    std::list<PlayerActionAdd*> borderActions;
+
+    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, borderActions);
+
+    //borderActions.clear();
+
+    CPlaygroundWidget *pWidget = new CPlaygroundWidget;
+    pWidget->show();
+    pWidget->showAvaliableBorderPosition(&game->playground, borderActions);
 
     a.exec();
     //return 0;

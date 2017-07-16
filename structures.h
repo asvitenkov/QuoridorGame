@@ -111,11 +111,11 @@ typedef struct
     unsigned char lines[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
 } PlaygroundLinesBorderMap;
 
-typedef struct
-{
-    PlaygroundLinesBorderMap verticalBorderMap;
-    PlaygroundLinesBorderMap horizontalBorderMap;
-} PlaygroundBorderMap;
+//typedef struct
+//{
+//    PlaygroundLinesBorderMap verticalBorderMap;
+//    PlaygroundLinesBorderMap horizontalBorderMap;
+//} PlaygroundBorderMap;
 
 
 typedef struct

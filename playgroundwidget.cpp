@@ -1,5 +1,6 @@
 #include "playgroundwidget.h"
-//#include "ui_cplaygroundwidget.h"
+#include "datautilsinl.h"
+
 
 #include <QGridLayout>
 #include <QPushButton>
@@ -245,11 +246,11 @@ void CPlaygroundWidget::setBorderStyle(QPushButton* button, QColor color)
 
 
 
-void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundBorderMap *borderMap, PlaygroundCellsMap *stepsMap)
+void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap)
 {
 
 #ifdef ENABLE_PARAMS_CHECKING
-    Q_CHECK_PTR(borderMap);
+    Q_CHECK_PTR(playgroundData);
     Q_CHECK_PTR(stepsMap);
 #endif
 
@@ -257,6 +258,67 @@ void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPositi
 
     addPlayer(x, y, position);
 
+    readBordersFromPlaygroundData(playgroundData);
+
+    for (size_t i = 0; i < PlaygroundLinesDataDefines::PlaygroundSize; i++)
+        for (size_t j = 0; j < PlaygroundLinesDataDefines::PlaygroundSize; j++)
+        {
+            if (stepsMap->map[i][j] != 255)
+                setCellText(QString::number(stepsMap->map[i][j]), i, j);
+        }
+}
+
+void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundData, const std::list<PlayerActionAdd*> &actions)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(playgroundData);
+#endif
+
+    resetPlayground();
+
+    readBordersFromPlaygroundData(playgroundData);
+
+    std::list<PlayerActionAdd*>::const_iterator it = actions.begin();
+
+    static const QColor color = Qt::red;
+    static const QColor colorHor = Qt::green;
+    static const QColor colorVert = Qt::blue;
+
+    while(it != actions.end())
+    {
+        const PlayerActionAdd* pItem = *it;
+
+        const unsigned char x = pItem->point.x;
+        const unsigned char y = pItem->point.y;
+
+        if (pItem->action.type == IPlayerAction::addHorizontalLine)
+        {
+            addHorizontalBorder(x, y);
+            setHorizontalBorderStyle(x, y, color);
+            // to hightlight the begginning of the border
+            setBorderStyle(getHorizontalBorder(x, y), colorHor);
+
+        }
+        else
+        {
+            addVerticalBorder(x, y);
+            setVerticalBorderStyle(x, y, color);
+            // to hightlight the begginning of the border
+            setBorderStyle(getVerticalBorder(x, y), colorVert);
+        }
+
+
+        ++it;
+    }
+}
+
+
+
+void CPlaygroundWidget::readBordersFromPlaygroundData(PlaygroundData *data)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+#endif
 
     size_t i = 0;
     size_t j = 0;
@@ -267,7 +329,7 @@ void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPositi
         j = 0;
         while (j < PlaygroundLinesDataDefines::LineLength)
         {
-            if (borderMap->horizontalBorderMap.lines[i][j] != 0)
+            if (PlaygroundLinesDataInl::value(&data->horizontalLines, i, j) != 0)
             {
                 addHorizontalBorder(i,j);
                 ++j;
@@ -283,7 +345,7 @@ void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPositi
         j = 0;
         while (j < PlaygroundLinesDataDefines::LineLength)
         {
-            if (borderMap->verticalBorderMap.lines[i][j] != 0)
+            if (PlaygroundLinesDataInl::value(&data->verticalLines, i, j) != 0)
             {
                 addVerticalBorder(i,j);
                 ++j;
@@ -292,15 +354,7 @@ void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPositi
         }
         ++i;
     }
-
-    for (i = 0; i < PlaygroundLinesDataDefines::PlaygroundSize; i++)
-        for (j = 0; j < PlaygroundLinesDataDefines::PlaygroundSize; j++)
-        {
-            if (stepsMap->map[i][j] != 255)
-                setCellText(QString::number(stepsMap->map[i][j]), i, j);
-        }
 }
-
 
 void CPlaygroundWidget::resetPlayground()
 {
@@ -351,6 +405,29 @@ void CPlaygroundWidget::resetPlayground()
                 }
             }
         }
+}
+
+
+void CPlaygroundWidget::setHorizontalBorderStyle(unsigned char x, unsigned char y, QColor color)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    checkAddBorderCoordinates(x, y);
+#endif
+
+    setBorderStyle(getHorizontalBorder(x, y), color);
+    setBorderStyle(getHorizontalBorderCross(x, y), color);
+    setBorderStyle(getHorizontalBorder(x, y + 1), color);
+}
+
+void CPlaygroundWidget::setVerticalBorderStyle(unsigned char x, unsigned char y, QColor color)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    checkAddBorderCoordinates(x, y);
+#endif
+
+    setBorderStyle(getVerticalBorder(x, y), color);
+    setBorderStyle(getVerticalBorderCross(x, y), color);
+    setBorderStyle(getVerticalBorder(x, y + 1), color);
 }
 
 bool CPlaygroundWidget::checkCellCoordinates(unsigned char x, unsigned char y)
