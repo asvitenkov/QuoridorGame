@@ -131,62 +131,36 @@ inline void setValue(PlaygroundLinesData *data, unsigned char x, unsigned char y
 }
 
 
-///
-/// \brief getAvaliableBorderPosition check borders position for pair <V,H> or <H,V> as you pass
-/// \param first  lines array to set borders
-/// \param second lines array to check borders
-///
-inline void getAvaliableBorderPosition(PlaygroundLinesData *first, PlaygroundLinesData *second, std::list<PointData> &positions)
-{
-    Q_CHECK_PTR(first);
-    Q_CHECK_PTR(second);
+//inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, PlaygroundLinesBorderMap &map)
+//{
+//#ifdef ENABLE_PARAMS_CHECKING
+//    Q_CHECK_PTR(data);
+//#endif
 
-    for (unsigned char x = 0; x < PlaygroundLinesDataDefines::LinesCount; x++)
-        for (unsigned char y = 0; y < (PlaygroundLinesDataDefines::LineLength - 1); y++)
-        {
-            // check if first[x,y] and first[x, y + 1] is empty
-            // and if second[y,x] is empty (no orthogonal border)
-            if (PlaygroundLinesDataInl::value(first, x, y) == LINE_EMPTY
-                    && PlaygroundLinesDataInl::value(first, x, y + 1) == LINE_EMPTY
-                    && PlaygroundLinesDataInl::value(second, y, x) == LINE_EMPTY)
-            {
-                PointData point = {x,y};
-                positions.push_back(point);
-            }
-        }
-}
+//    memset(&map, 0, sizeof(PlaygroundLinesBorderMap));
 
+//    unsigned char array[PlaygroundLinesDataDefines::ArraySize] = {0};
 
-inline void convertToPlaygroundLinesBorderMap(const PlaygroundLinesData *data, PlaygroundLinesBorderMap &map)
-{
-#ifdef ENABLE_PARAMS_CHECKING
-    Q_CHECK_PTR(data);
-#endif
+//    for (size_t i = 0; i < PlaygroundLinesDataDefines::ArraySize; i++)
+//        array[i] = PlaygroundLinesDataInl::rawByteValue(data, i);
 
-    memset(&map, 0, sizeof(PlaygroundLinesBorderMap));
+//    for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
+//        for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength - 1; y++)
+//            // -1 because we store only the beginning point of the border
+//        {
+//            const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
+//            const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
+//            const unsigned char byteItemIndex = index % PlaygroundLinesDataDefines::ItemsPerByte;
 
-    unsigned char array[PlaygroundLinesDataDefines::ArraySize] = {0};
+//            const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
 
-    for (size_t i = 0; i < PlaygroundLinesDataDefines::ArraySize; i++)
-        array[i] = PlaygroundLinesDataInl::rawByteValue(data, i);
+//            map.lines[x][y] |= itemValue;
 
-    for (size_t x = 0; x <  PlaygroundLinesDataDefines::LinesCount; x++)
-        for (size_t y = 0; y < PlaygroundLinesDataDefines::LineLength - 1; y++)
-            // -1 because we store only the beginning point of the border
-        {
-            const unsigned char index = x * PlaygroundLinesDataDefines::LineLength + y;
-            const unsigned char arrayIndex = index / PlaygroundLinesDataDefines::ItemsPerByte;
-            const unsigned char byteItemIndex = index % PlaygroundLinesDataDefines::ItemsPerByte;
+//            if (itemValue != 0)
+//                map.lines[x][y + 1] = itemValue;
+//        }
 
-            const unsigned char itemValue = byteItemValue(array[arrayIndex], byteItemIndex);
-
-            map.lines[x][y] |= itemValue;
-
-            if (itemValue != 0)
-                map.lines[x][y + 1] = itemValue;
-        }
-
-}
+//}
 
 inline void changeBorder(PlaygroundLinesData *data, unsigned char x, unsigned char y, bool addBorder)
 {
@@ -195,6 +169,9 @@ inline void changeBorder(PlaygroundLinesData *data, unsigned char x, unsigned ch
     Q_ASSERT_X(x < PlaygroundLinesDataDefines::LinesCount, "PlaygroundLinesDataInl::changeBorder", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
     // -1 because we can't add border to the last cell
     Q_ASSERT_X(y < PlaygroundLinesDataDefines::LineLength - 1, "PlaygroundLinesDataInl::changeBorder", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+
+    Q_ASSERT_X(PlaygroundLinesDataInl::value(data, x, y) == LINE_EMPTY
+               && ((y - 1) < 0 || PlaygroundLinesDataInl::value(data, x, y - 1) == LINE_EMPTY), "PlaygroundLinesDataInl::changeBorder", "Can't add border - position failed");
 #endif
 
     const unsigned char value = addBorder ? 1 : 0;
@@ -224,44 +201,6 @@ namespace PlaygroundDataInl
 
 //    return map;
 //}
-
-
-inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAdd*> &actions)
-{
-    Q_CHECK_PTR(data);
-
-    std::list<PointData> verticalBorderPositions, horizontalBorderPositions;
-
-    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->verticalLines, &data->horizontalLines, verticalBorderPositions);
-    PlaygroundLinesDataInl::getAvaliableBorderPosition(&data->horizontalLines, &data->verticalLines, horizontalBorderPositions);
-
-    std::list<PointData>::iterator it;
-
-    it = horizontalBorderPositions.begin();
-
-    while (it != horizontalBorderPositions.end())
-    {
-        PlayerActionAdd *item = new PlayerActionAdd;
-        item->action.type = IPlayerAction::addHorizontalLine;
-        item->point = *it;
-
-        actions.push_back(item);
-        ++it;
-    }
-
-    it = verticalBorderPositions.begin();
-
-    while (it != verticalBorderPositions.end())
-    {
-        PlayerActionAdd *item = new PlayerActionAdd;
-        item->action.type = IPlayerAction::addVerticalLine;
-        item->point = *it;
-
-        actions.push_back(item);
-        ++it;
-    }
-}
-
 
 inline bool canPlayerMooveTo(PlaygroundData *data, unsigned char x, unsigned char y, bool horizontal, bool positive)
 {
@@ -340,6 +279,54 @@ inline bool canPlayerMooveTo(PlaygroundData *data, unsigned char x, unsigned cha
 }
 
 
+///
+/// \brief getAvaliableBorderPosition check borders position for pair <V,H> or <H,V> as you pass
+/// \param first  lines array to set borders
+/// \param second lines array to check borders
+///
+inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAdd*> &actions)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+#endif
+
+    PlaygroundLinesData *first = &data->horizontalLines;
+    PlaygroundLinesData *second = &data->verticalLines;
+
+    for (int x = 0; x < PlaygroundLinesDataDefines::LinesCount; x++)
+        for (int y = 0; y < (PlaygroundLinesDataDefines::LineLength - 1); y++)
+        {
+            // check horizontal lines
+            // check if first[x,y] and first[x, y + 1] and first[x, y - 1] is empty
+            // and if second[y,x] is empty (no orthogonal border)
+            if (PlaygroundLinesDataInl::value(first, x, y) == LINE_EMPTY
+                    && PlaygroundLinesDataInl::value(first, x, y + 1) == LINE_EMPTY
+                    && ( (y - 1 < 0) || PlaygroundLinesDataInl::value(first, x, y - 1) == LINE_EMPTY)
+                    && PlaygroundLinesDataInl::value(second, y, x) == LINE_EMPTY)
+            {
+                PlayerActionAdd *item = new PlayerActionAdd;
+                item->action.type = IPlayerAction::addHorizontalLine;
+                item->point.x = x;
+                item->point.y = y;
+                actions.push_back(item);
+            }
+
+            // check vertical lines
+            // change first with second
+            if (PlaygroundLinesDataInl::value(second, x, y) == LINE_EMPTY
+                    && PlaygroundLinesDataInl::value(second, x, y + 1) == LINE_EMPTY
+                    && ( (y - 1 < 0) || PlaygroundLinesDataInl::value(second, x, y - 1) == LINE_EMPTY)
+                    && PlaygroundLinesDataInl::value(first, y, x) == LINE_EMPTY)
+            {
+                PlayerActionAdd *item = new PlayerActionAdd;
+                item->action.type = IPlayerAction::addVerticalLine;
+                item->point.x = x;
+                item->point.y = y;
+                actions.push_back(item);
+            }
+        }
+}
+
 inline void addVerticalBorder(PlaygroundData *data, unsigned char x, unsigned char y)
 {
     PlaygroundLinesDataInl::changeBorder(&data->verticalLines, x, y, true);
@@ -364,6 +351,8 @@ inline void removeHorizontalBorder(PlaygroundData *data, unsigned char x, unsign
 
 namespace GameDataInl
 {
+
+
 
 
 inline void getAvaliablePlayerActions(GameData *data, uint player)

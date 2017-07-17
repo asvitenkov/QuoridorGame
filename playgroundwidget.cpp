@@ -332,7 +332,7 @@ void CPlaygroundWidget::readBordersFromPlaygroundData(PlaygroundData *data)
             if (PlaygroundLinesDataInl::value(&data->horizontalLines, i, j) != 0)
             {
                 addHorizontalBorder(i,j);
-                ++j;
+                //++j;
             }
             ++j;
         }
@@ -348,7 +348,7 @@ void CPlaygroundWidget::readBordersFromPlaygroundData(PlaygroundData *data)
             if (PlaygroundLinesDataInl::value(&data->verticalLines, i, j) != 0)
             {
                 addVerticalBorder(i,j);
-                ++j;
+                //++j;
             }
             ++j;
         }

@@ -106,10 +106,10 @@ typedef struct
 } PlayerActionAdd;
 
 
-typedef struct
-{
-    unsigned char lines[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
-} PlaygroundLinesBorderMap;
+//typedef struct
+//{
+//    unsigned char lines[PlaygroundLinesDataDefines::LinesCount][PlaygroundLinesDataDefines::LineLength];
+//} PlaygroundLinesBorderMap;
 
 //typedef struct
 //{
