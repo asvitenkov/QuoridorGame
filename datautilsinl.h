@@ -2,6 +2,7 @@
 #define DATAUTILSINL
 
 #include "structures.h"
+#include "searchalg.h"
 
 #include <QDebug>
 #include <memory>
@@ -95,7 +96,7 @@ inline unsigned char setByteItemValue(unsigned char byte, unsigned char itemValu
     return byte;
 }
 
-inline unsigned char value(PlaygroundLinesData *data, unsigned char x, unsigned char y)
+inline unsigned char value(const PlaygroundLinesData *data, unsigned char x, unsigned char y)
 {
     Q_CHECK_PTR(data);
 
@@ -170,7 +171,7 @@ inline void changeBorder(PlaygroundLinesData *data, unsigned char x, unsigned ch
     // -1 because we can't add border to the last cell
     Q_ASSERT_X(y < PlaygroundLinesDataDefines::LineLength - 1, "PlaygroundLinesDataInl::changeBorder", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
 
-    Q_ASSERT_X(PlaygroundLinesDataInl::value(data, x, y) == LINE_EMPTY
+    Q_ASSERT_X(PlaygroundLinesDataInl::value(data, x, y) == (addBorder ? LINE_EMPTY : LINE_BEGIN)
                && ((y - 1) < 0 || PlaygroundLinesDataInl::value(data, x, y - 1) == LINE_EMPTY), "PlaygroundLinesDataInl::changeBorder", "Can't add border - position failed");
 #endif
 
@@ -284,10 +285,11 @@ inline bool canPlayerMooveTo(PlaygroundData *data, unsigned char x, unsigned cha
 /// \param first  lines array to set borders
 /// \param second lines array to check borders
 ///
-inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAdd*> &actions)
+inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActionAddBorder*> &actions)
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);
+    Q_ASSERT_X(actions.empty(), "GameDataInl::getAvaliableBorderActions", "actions is not empty");
 #endif
 
     PlaygroundLinesData *first = &data->horizontalLines;
@@ -304,8 +306,8 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
                     && ( (y - 1 < 0) || PlaygroundLinesDataInl::value(first, x, y - 1) == LINE_EMPTY)
                     && PlaygroundLinesDataInl::value(second, y, x) == LINE_EMPTY)
             {
-                PlayerActionAdd *item = new PlayerActionAdd;
-                item->action.type = IPlayerAction::addHorizontalLine;
+                PlayerActionAddBorder *item = new PlayerActionAddBorder;
+                item->action.type = IPlayerAction::addHorizontalBorder;
                 item->point.x = x;
                 item->point.y = y;
                 actions.push_back(item);
@@ -318,8 +320,8 @@ inline void getAvaliableBorderActions(PlaygroundData *data, std::list<PlayerActi
                     && ( (y - 1 < 0) || PlaygroundLinesDataInl::value(second, x, y - 1) == LINE_EMPTY)
                     && PlaygroundLinesDataInl::value(first, y, x) == LINE_EMPTY)
             {
-                PlayerActionAdd *item = new PlayerActionAdd;
-                item->action.type = IPlayerAction::addVerticalLine;
+                PlayerActionAddBorder *item = new PlayerActionAddBorder;
+                item->action.type = IPlayerAction::addVerticalBorder;
                 item->point.x = x;
                 item->point.y = y;
                 actions.push_back(item);
@@ -353,37 +355,149 @@ namespace GameDataInl
 {
 
 
-
-
-inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::list<IPlayerAction*> &playerActions)
+inline void doAction(GameData *gameData, uint playerIndex, const IPlayerAction *playerAction)
 {
 #ifdef ENABLE_PARAMS_CHECKING
-    Q_CHECK_PTR(data);
-    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::getAvaliablePlayerActions", "Player is out of range");
+    Q_CHECK_PTR(gameData);
+    Q_CHECK_PTR(playerAction);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::doAction", "Player is out of range");
 #endif
 
+    IPlayerAction::PlayerActionType actionType = static_cast<IPlayerAction::PlayerActionType>(playerAction->type);
+    PlayerData &player = gameData->players[playerIndex];
 
-
-    if (data->players[playerIndex].borderCount > 0)
+    if (actionType == IPlayerAction::addHorizontalBorder
+            || actionType == IPlayerAction::addVerticalBorder)
     {
-        std::list<PlayerActionAdd*> borderActions;
-        PlaygroundDataInl::getAvaliableBorderActions(&data->playground, borderActions);
+#ifdef ENABLE_PARAMS_CHECKING
+        Q_ASSERT_X(player.borderCount > 0, "GameDataInl::doAction", "Add border failed - no free border avaliable");
+#endif
+        PlayerActionAddBorder *pAction = const_cast<PlayerActionAddBorder*>(reinterpret_cast<const PlayerActionAddBorder*>(playerAction));
 
-        std::list<PlayerActionAdd*>::iterator it = borderActions.begin();
+        if (actionType == IPlayerAction::addHorizontalBorder)
+            PlaygroundDataInl::addHorizontalBorder(&gameData->playground, pAction->point.x, pAction->point.y);
+
+        if (actionType == IPlayerAction::addVerticalBorder)
+            PlaygroundDataInl::addVerticalBorder(&gameData->playground, pAction->point.x, pAction->point.y);
+
+        player.borderCount--;
+    }
+    else
+    {
+        const unsigned char x = player.x;
+        const unsigned char y = player.y;
+
+        const bool horizontalMoovment = actionType == IPlayerAction::moveLeft  || actionType == IPlayerAction::moveRight;
+        const bool   positiveMoovment = actionType == IPlayerAction::moveRight || actionType == IPlayerAction::moveBottom;
+
+#ifdef ENABLE_PARAMS_CHECKING
+        Q_ASSERT_X(PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, horizontalMoovment, positiveMoovment),
+                   "GameDataInl::doAction", QString("player can't move from [%1,%2] to %3").arg(x).arg(y).arg(actionType).toStdString().c_str());
+#endif
+
+        if (horizontalMoovment)
+        {
+            player.x = player.x + positiveMoovment ? 1 : -1;
+        }
+        else
+        {
+            player.y = player.y + positiveMoovment ? 1 : -1;
+        }
+    }
+}
+
+inline void undoAction(GameData *gameData, uint playerIndex, const IPlayerAction *playerAction)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+    Q_CHECK_PTR(playerAction);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::undoAction", "Player is out of range");
+#endif
+
+    IPlayerAction::PlayerActionType actionType = static_cast<IPlayerAction::PlayerActionType>(playerAction->type);
+    PlayerData &player = gameData->players[playerIndex];
+
+    if (actionType == IPlayerAction::addHorizontalBorder
+            || actionType == IPlayerAction::addVerticalBorder)
+    {
+        PlayerActionAddBorder *pAction = const_cast<PlayerActionAddBorder*>(reinterpret_cast<const PlayerActionAddBorder*>(playerAction));
+
+        if (actionType == IPlayerAction::addHorizontalBorder)
+            PlaygroundDataInl::removeHorizontalBorder(&gameData->playground, pAction->point.x, pAction->point.y);
+
+        if (actionType == IPlayerAction::addVerticalBorder)
+            PlaygroundDataInl::removeVerticalBorder(&gameData->playground, pAction->point.x, pAction->point.y);
+
+        player.borderCount++;
+    }
+    else
+    {
+        const unsigned char x = player.x;
+        const unsigned char y = player.y;
+
+        const bool horizontalMoovment = actionType == IPlayerAction::moveLeft  || actionType == IPlayerAction::moveRight;
+        const bool positiveMoovment = !(actionType == IPlayerAction::moveRight || actionType == IPlayerAction::moveBottom);
+
+#ifdef ENABLE_PARAMS_CHECKING
+        Q_ASSERT_X(PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, horizontalMoovment, positiveMoovment),
+                   "GameDataInl::undoAction", QString("player can't move from [%1,%2] to %3").arg(x).arg(y).arg(actionType).toStdString().c_str());
+#endif
+
+        if (horizontalMoovment)
+        {
+            player.x = player.x + positiveMoovment ? 1 : -1;
+        }
+        else
+        {
+            player.y = player.y + positiveMoovment ? 1 : -1;
+        }
+    }
+}
+
+
+inline void getAvaliablePlayerActions(GameData *gameData, uint playerIndex, std::list<IPlayerAction*> &playerActions)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::getAvaliablePlayerActions", "Player is out of range");
+    Q_ASSERT_X(playerActions.empty(), "GameDataInl::getAvaliablePlayerActions", "playerActions is not empty");
+#endif
+
+    if (gameData->players[playerIndex].borderCount > 0)
+    {
+        std::list<PlayerActionAddBorder*> borderActions;
+        PlaygroundDataInl::getAvaliableBorderActions(&gameData->playground, borderActions);
+
+        std::list<PlayerActionAddBorder*>::iterator it = borderActions.begin();
 
         while (it != borderActions.end())
         {
-            playerActions.push_back(reinterpret_cast<IPlayerAction*>(*it));
+            IPlayerAction *pAction = reinterpret_cast<IPlayerAction*>(*it);
+
+            GameDataInl::doAction(gameData, playerIndex, pAction);
+
+            bool flag = true;
+
+            for (size_t i = 0; i < PlayerDataDefines::PlayerCount && flag; i++)
+            {
+                PlayerData &player = gameData->players[i];
+                flag = SearchAlg::checkFinishRoute(&gameData->playground, player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+            }
+
+            if (flag)
+                playerActions.push_back(pAction);
+
+            GameDataInl::undoAction(gameData, playerIndex, pAction);
             ++it;
         }
     }
 
 
-    const unsigned char x = data->players[playerIndex].x;
-    const unsigned char y = data->players[playerIndex].y;
+    const unsigned char x = gameData->players[playerIndex].x;
+    const unsigned char y = gameData->players[playerIndex].y;
 
     // left moovment
-    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, true, false))
+    if (PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, true, false))
     {
         PlayerActionMove* pAction = new PlayerActionMove;
         pAction->action.type = IPlayerAction::moveLeft;
@@ -391,7 +505,7 @@ inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::lis
     }
 
     // right moovment
-    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, true, true))
+    if (PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, true, true))
     {
         PlayerActionMove* pAction = new PlayerActionMove;
         pAction->action.type = IPlayerAction::moveRight;
@@ -399,7 +513,7 @@ inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::lis
     }
 
     // top moovment
-    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, false, false))
+    if (PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, false, false))
     {
         PlayerActionMove* pAction = new PlayerActionMove;
         pAction->action.type = IPlayerAction::moveTop;
@@ -407,7 +521,7 @@ inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::lis
     }
 
     // bottom moovment
-    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, false, true))
+    if (PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, false, true))
     {
         PlayerActionMove* pAction = new PlayerActionMove;
         pAction->action.type = IPlayerAction::moveBottom;
@@ -417,7 +531,7 @@ inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::lis
 
     // at the end we must check
     // all players can go to finish position or not if we add new border
-    implement checking
+
 
 }
 

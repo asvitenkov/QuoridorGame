@@ -86,8 +86,8 @@ typedef struct
         moveBottom        = 1,
         moveLeft          = 2,
         moveRight         = 3,
-        addVerticalLine   = 4,
-        addHorizontalLine = 5,
+        addVerticalBorder   = 4,
+        addHorizontalBorder = 5,
     } PlayerActionType;
 
     unsigned char type;
@@ -103,7 +103,7 @@ typedef struct
 {
     IPlayerAction action;
     PointData     point;
-} PlayerActionAdd;
+} PlayerActionAddBorder;
 
 
 //typedef struct

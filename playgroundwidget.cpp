@@ -244,7 +244,19 @@ void CPlaygroundWidget::setBorderStyle(QPushButton* button, QColor color)
     button->setStyleSheet(QString(BORDER_STYLE_TEMPLATE).arg(color.red()).arg(color.green()).arg(color.blue()));
 }
 
+void CPlaygroundWidget::showGame(const GameData *gameData)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+#endif
 
+    resetPlayground();
+
+    for (size_t i = 0; i < PlayerDataDefines::PlayerCount; i++)
+        addPlayer(gameData->players[i].x, gameData->players[i].y, static_cast<FinishPosition>(gameData->players[i].finishPosition));
+
+    readBordersFromPlaygroundData(&gameData->playground);
+}
 
 void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap)
 {
@@ -268,7 +280,7 @@ void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPositi
         }
 }
 
-void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundData, const std::list<PlayerActionAdd*> &actions)
+void CPlaygroundWidget::showAvaliableBorderPosition(const PlaygroundData *playgroundData, const std::list<PlayerActionAddBorder*> &actions)
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(playgroundData);
@@ -278,33 +290,33 @@ void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundDa
 
     readBordersFromPlaygroundData(playgroundData);
 
-    std::list<PlayerActionAdd*>::const_iterator it = actions.begin();
+    std::list<PlayerActionAddBorder*>::const_iterator it = actions.begin();
 
-    static const QColor color = Qt::darkBlue;
+    static const QColor color = Qt::darkRed;
     static const QColor colorHor = Qt::darkGreen;
     static const QColor colorVert = Qt::darkBlue;
 
     while(it != actions.end())
     {
-        const PlayerActionAdd* pItem = *it;
+        const PlayerActionAddBorder* pItem = *it;
 
         const unsigned char x = pItem->point.x;
         const unsigned char y = pItem->point.y;
 
-        if (pItem->action.type == IPlayerAction::addHorizontalLine)
+        if (pItem->action.type == IPlayerAction::addHorizontalBorder)
         {
             addHorizontalBorder(x, y);
-            setHorizontalBorderStyle(x, y, color);
+            setHorizontalBorderStyle(x, y, colorHor);
             // to hightlight the begginning of the border
-            setBorderStyle(getHorizontalBorder(x, y), colorHor);
+            setBorderStyle(getHorizontalBorder(x, y), color);
 
         }
         else
         {
             addVerticalBorder(x, y);
-            setVerticalBorderStyle(x, y, color);
+            setVerticalBorderStyle(x, y, colorVert);
             // to hightlight the begginning of the border
-            setBorderStyle(getVerticalBorder(x, y), colorVert);
+            setBorderStyle(getVerticalBorder(x, y), color);
         }
 
 
@@ -313,7 +325,7 @@ void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundDa
 }
 
 
-void CPlaygroundWidget::showAvaliablePlayerActions(GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions)
+void CPlaygroundWidget::showAvaliablePlayerActions(const GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions)
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(gameData);
@@ -323,16 +335,17 @@ void CPlaygroundWidget::showAvaliablePlayerActions(GameData *gameData, uint play
 //    resetPlayground();
 //    readBordersFromPlaygroundData(&gameData->playground);
 
-    std::list<PlayerActionAdd*> borderActions;
+    std::list<PlayerActionAddBorder*> borderActions;
     std::list<PlayerActionMove*> moveActions;
     std::list<IPlayerAction*>::const_iterator it = actions.begin();
 
     while (it != actions.end())
     {
         const IPlayerAction *pItem = *it;
-        if (pItem->type == IPlayerAction::addHorizontalLine || pItem->type == IPlayerAction::addVerticalLine)
+        if (pItem->type == IPlayerAction::addHorizontalBorder
+                || pItem->type == IPlayerAction::addVerticalBorder)
         {
-            borderActions.push_back(const_cast<PlayerActionAdd*>(reinterpret_cast<const PlayerActionAdd*>(pItem)));
+            borderActions.push_back(const_cast<PlayerActionAddBorder*>(reinterpret_cast<const PlayerActionAddBorder*>(pItem)));
         }
         else
         {
@@ -343,8 +356,15 @@ void CPlaygroundWidget::showAvaliablePlayerActions(GameData *gameData, uint play
 
     showAvaliableBorderPosition(&gameData->playground, borderActions);
 
-    const PlayerData player = gameData->players[playerIndex];
-    addPlayer(player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+
+
+    for (size_t i = 0; i < PlayerDataDefines::PlayerCount; i++)
+    {
+        const PlayerData &item = gameData->players[i];
+        addPlayer(item.x, item.y, static_cast<FinishPosition>(item.finishPosition));
+    }
+
+    const PlayerData &player = gameData->players[playerIndex];
 
     std::list<PlayerActionMove*>::const_iterator itMove = moveActions.begin();
 
@@ -381,7 +401,7 @@ void CPlaygroundWidget::showAvaliablePlayerActions(GameData *gameData, uint play
 }
 
 
-void CPlaygroundWidget::readBordersFromPlaygroundData(PlaygroundData *data)
+void CPlaygroundWidget::readBordersFromPlaygroundData(const PlaygroundData *data)
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);
@@ -433,6 +453,8 @@ void CPlaygroundWidget::resetPlayground()
             pButton->setProperty(PROPERTY_COLOR_NAME, m_defaultCellColor);
             pButton->setProperty(PROPERTY_BORDER_COLOR_NAME, m_defaultBorderColor);
             pButton->setProperty(PROPERTY_BORDER_SIZE, 0);
+
+            pButton->setText("");
 
             if (i % 2 == 0)
             {

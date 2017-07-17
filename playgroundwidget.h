@@ -22,8 +22,9 @@ public:
     ~CPlaygroundWidget();
 
     void showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap);
-    void showAvaliableBorderPosition(PlaygroundData *playgroundData, const std::list<PlayerActionAdd*> &actions);
-    void showAvaliablePlayerActions(GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions);
+    void showAvaliableBorderPosition(const PlaygroundData *playgroundData, const std::list<PlayerActionAddBorder*> &actions);
+    void showAvaliablePlayerActions(const GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions);
+    void showGame(const GameData *gameData);
 
 private:
     enum Defines
@@ -65,7 +66,7 @@ private:
 
     void resetPlayground();
 
-    void readBordersFromPlaygroundData(PlaygroundData *data);
+    void readBordersFromPlaygroundData(const PlaygroundData *data);
 
     static bool checkCellCoordinates(unsigned char x, unsigned char y);
     static bool checkBorderCoordinates(unsigned char x, unsigned char y);

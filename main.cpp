@@ -11,6 +11,8 @@
 #include "searchalg.h"
 #include "playgroundwidget.h"
 
+//delete me
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +29,16 @@ int main(int argc, char *argv[])
     game->players[1].y = 4;
     game->players[1].finishPosition = FinishPosotionRight;
     game->players[1].borderCount = 7;
+
+    game->players[2].x = 4;
+    game->players[2].y = 8;
+    game->players[2].finishPosition = FinishPosotionTop;
+    game->players[2].borderCount = 7;
+
+    game->players[3].x = 8;
+    game->players[3].y = 4;
+    game->players[3].finishPosition = FinishPosotionLeft;
+    game->players[3].borderCount = 7;
 
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 0);
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 2);
@@ -61,15 +73,26 @@ int main(int argc, char *argv[])
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 5, 7);
     PlaygroundDataInl::addVerticalBorder(&game->playground, 6, 5);
 
+//    CPlaygroundWidget *pWidget = new CPlaygroundWidget;
+//    pWidget->show();
+//    pWidget->move(0,0);
+
+//    pWidget->showGame(game);
 
     std::list<IPlayerAction*> actions;
+    for (size_t i = 0; i < 4; i++)
+    {
+        CPlaygroundWidget *pWidget = new CPlaygroundWidget;
+        pWidget->show();
+        pWidget->move(0,0);
 
-    GameDataInl::getAvaliablePlayerActions(game, 1, actions);
-
-
-    CPlaygroundWidget *pWidget = new CPlaygroundWidget;
-    pWidget->show();
-    pWidget->showAvaliablePlayerActions(game, 1, actions);
+        actions.clear();
+        GameDataInl::getAvaliablePlayerActions(game, i, actions);
+        pWidget->showAvaliablePlayerActions(game, i, actions);
+            QMessageBox msgBox;
+            msgBox.setText("The document has been modified.");
+            msgBox.exec();
+    }
 
     a.exec();
     //return 0;
