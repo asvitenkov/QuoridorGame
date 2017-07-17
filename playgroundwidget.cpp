@@ -280,9 +280,9 @@ void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundDa
 
     std::list<PlayerActionAdd*>::const_iterator it = actions.begin();
 
-    static const QColor color = Qt::red;
-    static const QColor colorHor = Qt::green;
-    static const QColor colorVert = Qt::blue;
+    static const QColor color = Qt::darkBlue;
+    static const QColor colorHor = Qt::darkGreen;
+    static const QColor colorVert = Qt::darkBlue;
 
     while(it != actions.end())
     {
@@ -312,6 +312,73 @@ void CPlaygroundWidget::showAvaliableBorderPosition(PlaygroundData *playgroundDa
     }
 }
 
+
+void CPlaygroundWidget::showAvaliablePlayerActions(GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "CPlaygroundWidget::showAvaliablePlayerActions", "Player is out of range");
+#endif
+
+//    resetPlayground();
+//    readBordersFromPlaygroundData(&gameData->playground);
+
+    std::list<PlayerActionAdd*> borderActions;
+    std::list<PlayerActionMove*> moveActions;
+    std::list<IPlayerAction*>::const_iterator it = actions.begin();
+
+    while (it != actions.end())
+    {
+        const IPlayerAction *pItem = *it;
+        if (pItem->type == IPlayerAction::addHorizontalLine || pItem->type == IPlayerAction::addVerticalLine)
+        {
+            borderActions.push_back(const_cast<PlayerActionAdd*>(reinterpret_cast<const PlayerActionAdd*>(pItem)));
+        }
+        else
+        {
+            moveActions.push_back(const_cast<PlayerActionMove*>(reinterpret_cast<const PlayerActionMove*>(pItem)));
+        }
+        ++it;
+    }
+
+    showAvaliableBorderPosition(&gameData->playground, borderActions);
+
+    const PlayerData player = gameData->players[playerIndex];
+    addPlayer(player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+
+    std::list<PlayerActionMove*>::const_iterator itMove = moveActions.begin();
+
+    while (itMove != moveActions.end())
+    {
+        const PlayerActionMove *pItem = *itMove;
+        unsigned char x = player.x;
+        unsigned char y = player.y;
+
+        const QColor color = Qt::magenta;
+
+        if (pItem->action.type == IPlayerAction::moveLeft)
+        {
+            x -= 1;
+        }
+        else if (pItem->action.type == IPlayerAction::moveRight)
+        {
+            x += 1;
+        }
+        else if (pItem->action.type == IPlayerAction::moveTop)
+        {
+            y -= 1;
+        }
+        else if (pItem->action.type == IPlayerAction::moveBottom)
+        {
+            y += 1;
+        }
+
+        setCellColor(color, x, y);
+        setCellText("move", x, y);
+
+        ++itMove;
+    }
+}
 
 
 void CPlaygroundWidget::readBordersFromPlaygroundData(PlaygroundData *data)

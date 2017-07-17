@@ -23,6 +23,7 @@ public:
 
     void showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap);
     void showAvaliableBorderPosition(PlaygroundData *playgroundData, const std::list<PlayerActionAdd*> &actions);
+    void showAvaliablePlayerActions(GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions);
 
 private:
     enum Defines

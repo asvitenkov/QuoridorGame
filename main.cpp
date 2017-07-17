@@ -18,6 +18,16 @@ int main(int argc, char *argv[])
 
     GameData *game = CGameData::createGameDataStructure();
 
+    game->players[0].x = 4;
+    game->players[0].y = 0;
+    game->players[0].finishPosition = FinishPosotionBottom;
+    game->players[0].borderCount = 7;
+
+    game->players[1].x = 0;
+    game->players[1].y = 4;
+    game->players[1].finishPosition = FinishPosotionRight;
+    game->players[1].borderCount = 7;
+
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 0);
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 2);
     PlaygroundDataInl::addHorizontalBorder(&game->playground, 0, 4);
@@ -52,24 +62,14 @@ int main(int argc, char *argv[])
     PlaygroundDataInl::addVerticalBorder(&game->playground, 6, 5);
 
 
-    //SearchAlg::checkFinishRoute(&game->playground, 4, 0, FinishPosotionBottom);
+    std::list<IPlayerAction*> actions;
 
+    GameDataInl::getAvaliablePlayerActions(game, 1, actions);
 
-//    GameDataInl::getAvaliablePlayerActions(game, 0);
-
-
-//    CPlaygroundWidget widget;
-//    widget.show();
-
-    std::list<PlayerActionAdd*> borderActions;
-
-    PlaygroundDataInl::getAvaliableBorderActions(&game->playground, borderActions);
-
-    //borderActions.clear();
 
     CPlaygroundWidget *pWidget = new CPlaygroundWidget;
     pWidget->show();
-    pWidget->showAvaliableBorderPosition(&game->playground, borderActions);
+    pWidget->showAvaliablePlayerActions(game, 1, actions);
 
     a.exec();
     //return 0;

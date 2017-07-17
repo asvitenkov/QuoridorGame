@@ -27,10 +27,10 @@ typedef struct
 
 typedef struct
 {
-    unsigned char x : 2;
-    unsigned char y : 2;
-    unsigned char borderCount : 2;
-    unsigned char finishPosition : 2;
+    unsigned char x : 4;
+    unsigned char y : 4;
+    unsigned char borderCount : 4;
+    unsigned char finishPosition : 4;
 } PlayerData;
 
 typedef struct

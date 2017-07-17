@@ -355,16 +355,70 @@ namespace GameDataInl
 
 
 
-inline void getAvaliablePlayerActions(GameData *data, uint player)
+inline void getAvaliablePlayerActions(GameData *data, uint playerIndex, std::list<IPlayerAction*> &playerActions)
 {
+#ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::getAvaliablePlayerActions", "Player is out of range");
+#endif
 
-    if (!(player < PlayerDataDefines::PlayerCount))
-        return;
 
-    std::list<PlayerActionAdd*> borderActions;
 
-    PlaygroundDataInl::getAvaliableBorderActions(&data->playground, borderActions);
+    if (data->players[playerIndex].borderCount > 0)
+    {
+        std::list<PlayerActionAdd*> borderActions;
+        PlaygroundDataInl::getAvaliableBorderActions(&data->playground, borderActions);
+
+        std::list<PlayerActionAdd*>::iterator it = borderActions.begin();
+
+        while (it != borderActions.end())
+        {
+            playerActions.push_back(reinterpret_cast<IPlayerAction*>(*it));
+            ++it;
+        }
+    }
+
+
+    const unsigned char x = data->players[playerIndex].x;
+    const unsigned char y = data->players[playerIndex].y;
+
+    // left moovment
+    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, true, false))
+    {
+        PlayerActionMove* pAction = new PlayerActionMove;
+        pAction->action.type = IPlayerAction::moveLeft;
+        playerActions.push_back(reinterpret_cast<IPlayerAction*>(pAction));
+    }
+
+    // right moovment
+    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, true, true))
+    {
+        PlayerActionMove* pAction = new PlayerActionMove;
+        pAction->action.type = IPlayerAction::moveRight;
+        playerActions.push_back(reinterpret_cast<IPlayerAction*>(pAction));
+    }
+
+    // top moovment
+    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, false, false))
+    {
+        PlayerActionMove* pAction = new PlayerActionMove;
+        pAction->action.type = IPlayerAction::moveTop;
+        playerActions.push_back(reinterpret_cast<IPlayerAction*>(pAction));
+    }
+
+    // bottom moovment
+    if (PlaygroundDataInl::canPlayerMooveTo(&data->playground, x, y, false, true))
+    {
+        PlayerActionMove* pAction = new PlayerActionMove;
+        pAction->action.type = IPlayerAction::moveBottom;
+        playerActions.push_back(reinterpret_cast<IPlayerAction*>(pAction));
+    }
+
+
+    // at the end we must check
+    // all players can go to finish position or not if we add new border
+    implement checking
+
 }
 
 
