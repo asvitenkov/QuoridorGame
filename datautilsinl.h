@@ -384,24 +384,29 @@ inline void doAction(GameData *gameData, uint playerIndex, const IPlayerAction *
     }
     else
     {
-        const unsigned char x = player.x;
-        const unsigned char y = player.y;
-
         const bool horizontalMoovment = actionType == IPlayerAction::moveLeft  || actionType == IPlayerAction::moveRight;
         const bool   positiveMoovment = actionType == IPlayerAction::moveRight || actionType == IPlayerAction::moveBottom;
 
 #ifdef ENABLE_PARAMS_CHECKING
+        const unsigned char x = player.x;
+        const unsigned char y = player.y;
+
+        Q_UNUSED(x);
+        Q_UNUSED(y);
+
         Q_ASSERT_X(PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, horizontalMoovment, positiveMoovment),
                    "GameDataInl::doAction", QString("player can't move from [%1,%2] to %3").arg(x).arg(y).arg(actionType).toStdString().c_str());
 #endif
 
+        const char dd = positiveMoovment ? 1 : -1;
+
         if (horizontalMoovment)
         {
-            player.x = player.x + positiveMoovment ? 1 : -1;
+            player.x = player.x + dd;
         }
         else
         {
-            player.y = player.y + positiveMoovment ? 1 : -1;
+            player.y = player.y + dd;
         }
     }
 }
@@ -432,24 +437,29 @@ inline void undoAction(GameData *gameData, uint playerIndex, const IPlayerAction
     }
     else
     {
-        const unsigned char x = player.x;
-        const unsigned char y = player.y;
-
         const bool horizontalMoovment = actionType == IPlayerAction::moveLeft  || actionType == IPlayerAction::moveRight;
         const bool positiveMoovment = !(actionType == IPlayerAction::moveRight || actionType == IPlayerAction::moveBottom);
 
 #ifdef ENABLE_PARAMS_CHECKING
+        const unsigned char x = player.x;
+        const unsigned char y = player.y;
+
+        Q_UNUSED(x);
+        Q_UNUSED(y);
+
         Q_ASSERT_X(PlaygroundDataInl::canPlayerMooveTo(&gameData->playground, x, y, horizontalMoovment, positiveMoovment),
                    "GameDataInl::undoAction", QString("player can't move from [%1,%2] to %3").arg(x).arg(y).arg(actionType).toStdString().c_str());
 #endif
 
+        const char dd = positiveMoovment ? 1 : -1;
+
         if (horizontalMoovment)
         {
-            player.x = player.x + positiveMoovment ? 1 : -1;
+            player.x = player.x + dd;
         }
         else
         {
-            player.y = player.y + positiveMoovment ? 1 : -1;
+            player.y = player.y + dd;
         }
     }
 }
@@ -462,35 +472,6 @@ inline void getAvaliablePlayerActions(GameData *gameData, uint playerIndex, std:
     Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "GameDataInl::getAvaliablePlayerActions", "Player is out of range");
     Q_ASSERT_X(playerActions.empty(), "GameDataInl::getAvaliablePlayerActions", "playerActions is not empty");
 #endif
-
-    if (gameData->players[playerIndex].borderCount > 0)
-    {
-        std::list<PlayerActionAddBorder*> borderActions;
-        PlaygroundDataInl::getAvaliableBorderActions(&gameData->playground, borderActions);
-
-        std::list<PlayerActionAddBorder*>::iterator it = borderActions.begin();
-
-        while (it != borderActions.end())
-        {
-            IPlayerAction *pAction = reinterpret_cast<IPlayerAction*>(*it);
-
-            GameDataInl::doAction(gameData, playerIndex, pAction);
-
-            bool flag = true;
-
-            for (size_t i = 0; i < PlayerDataDefines::PlayerCount && flag; i++)
-            {
-                PlayerData &player = gameData->players[i];
-                flag = SearchAlg::checkFinishRoute(&gameData->playground, player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
-            }
-
-            if (flag)
-                playerActions.push_back(pAction);
-
-            GameDataInl::undoAction(gameData, playerIndex, pAction);
-            ++it;
-        }
-    }
 
 
     const unsigned char x = gameData->players[playerIndex].x;
@@ -528,11 +509,36 @@ inline void getAvaliablePlayerActions(GameData *gameData, uint playerIndex, std:
         playerActions.push_back(reinterpret_cast<IPlayerAction*>(pAction));
     }
 
+    //uncomment me please
+    // commented just for testing
+    if (gameData->players[playerIndex].borderCount > 0)
+    {
+        std::list<PlayerActionAddBorder*> borderActions;
+        PlaygroundDataInl::getAvaliableBorderActions(&gameData->playground, borderActions);
 
-    // at the end we must check
-    // all players can go to finish position or not if we add new border
+        std::list<PlayerActionAddBorder*>::iterator it = borderActions.begin();
 
+        while (it != borderActions.end())
+        {
+            IPlayerAction *pAction = reinterpret_cast<IPlayerAction*>(*it);
 
+            GameDataInl::doAction(gameData, playerIndex, pAction);
+
+            bool flag = true;
+
+            for (size_t i = 0; i < PlayerDataDefines::PlayerCount && flag; i++)
+            {
+                PlayerData &player = gameData->players[i];
+                flag = SearchAlg::checkFinishRoute(&gameData->playground, player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+            }
+
+            if (flag)
+                playerActions.push_back(pAction);
+
+            GameDataInl::undoAction(gameData, playerIndex, pAction);
+            ++it;
+        }
+    }
 }
 
 

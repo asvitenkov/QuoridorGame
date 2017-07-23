@@ -4,6 +4,7 @@
 
 #include <QGridLayout>
 #include <QPushButton>
+#include <QMessageBox>
 
 #define CELL_STYLE_TEMPLATE    "background-color: rgb(%1,%2,%3); border: %4px solid rgb(%5,%6,%7); border-radius: 5px;"
 //#define CELL_STYLE_EMPTY    (QString(CELL_STYLE_TEMPLATE).arg(143).arg(143).arg(143).arg(0)) //"background-color: rgb(162, 143, 143); border-width: 0px; border-radius: 0px;"
@@ -496,6 +497,47 @@ void CPlaygroundWidget::resetPlayground()
         }
 }
 
+
+void CPlaygroundWidget::showGameStatic(const GameData *gameData)
+{
+//    CPlaygroundWidget *pWidget = new CPlaygroundWidget;
+//    pWidget->show();
+//    pWidget->move(0,0);
+//    pWidget->showGame(gameData);
+//    QMessageBox msgBox;
+//    msgBox.setText("");
+//    msgBox.exec();
+//    delete pWidget;
+
+    static CPlaygroundWidget pWidget;
+    pWidget.show();
+    pWidget.move(0,0);
+    pWidget.showGame(gameData);
+    QMessageBox msgBox;
+    msgBox.setText("");
+    msgBox.exec();
+}
+
+void CPlaygroundWidget::showGameChangesStatic(const GameData *gameData)
+{
+    static CPlaygroundWidget *pWidget1 = new CPlaygroundWidget;
+    static CPlaygroundWidget *pWidget2 = new CPlaygroundWidget;
+
+    CPlaygroundWidget *pTmp = pWidget2;
+    pWidget2 = pWidget1;
+    pWidget1 = pTmp;
+
+    pWidget1->show();
+    pWidget1->move(0,0);
+
+    pWidget2->show();
+    pWidget2->move(600,0);
+    pWidget2->showGame(gameData);
+    QMessageBox msgBox;
+    msgBox.setText("");
+    msgBox.move(600,500);
+    msgBox.exec();
+}
 
 void CPlaygroundWidget::setHorizontalBorderStyle(unsigned char x, unsigned char y, QColor color)
 {

@@ -181,3 +181,16 @@ GameData* CGameData::createGameDataStructure()
 
     return ptr;
 }
+
+GameData* CGameData::copyGameDataStructure(const GameData *gameData)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+#endif
+
+    GameData *copy = createGameDataStructure();
+
+    memcpy(copy, gameData, sizeof(GameData));
+
+    return copy;
+}

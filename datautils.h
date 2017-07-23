@@ -63,6 +63,7 @@ class CGameData
 {
 public:
     static GameData* createGameDataStructure();
+    static GameData* copyGameDataStructure(const GameData *gameData);
 
 private:
 };

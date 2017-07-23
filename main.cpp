@@ -10,9 +10,12 @@
 #include "datautilsinl.h"
 #include "searchalg.h"
 #include "playgroundwidget.h"
+#include "gamealg.h"
 
 //delete me
 #include <QMessageBox>
+
+#pragma comment(linker, "/STACK:800000000")
 
 int main(int argc, char *argv[])
 {
@@ -79,20 +82,29 @@ int main(int argc, char *argv[])
 
 //    pWidget->showGame(game);
 
-    std::list<IPlayerAction*> actions;
-    for (size_t i = 0; i < 4; i++)
-    {
-        CPlaygroundWidget *pWidget = new CPlaygroundWidget;
-        pWidget->show();
-        pWidget->move(0,0);
+//    std::list<IPlayerAction*> actions;
+//    for (size_t i = 0; i < 4; i++)
+//    {
+////        CPlaygroundWidget *pWidget = new CPlaygroundWidget;
+////        pWidget->show();
+////        pWidget->move(0,0);
 
-        actions.clear();
-        GameDataInl::getAvaliablePlayerActions(game, i, actions);
-        pWidget->showAvaliablePlayerActions(game, i, actions);
-            QMessageBox msgBox;
-            msgBox.setText("The document has been modified.");
-            msgBox.exec();
-    }
+//        actions.clear();
+//        GameDataInl::getAvaliablePlayerActions(game, i, actions);
+////        pWidget->showAvaliablePlayerActions(game, i, actions);
+////            QMessageBox msgBox;
+////            msgBox.setText("The document has been modified.");
+////            msgBox.exec();
+//    }
+
+
+    quint64 total,win;
+    total = win = 0;
+
+    GameAlg::processGameStateRec(game, &total, &win);
+
+    qDebug() << "total: " << total;
+    qDebug() << "win: " << win;
 
     a.exec();
     //return 0;

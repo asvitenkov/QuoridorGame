@@ -9,8 +9,6 @@
 //#include <QMessageBox>
 //CPlaygroundWidget *gWidget = NULL;
 
-namespace SearchAlg
-{
 
 typedef struct
 {
@@ -27,6 +25,26 @@ static FinistPointData gFinistPointDataArray[4] = {
     {0, -1}
 };
 
+inline bool isPlayerAtFinishPositionPri(unsigned char x, unsigned char y, FinishPosition finishPosition)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::isPlayerAtFinishPosition", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::isPlayerAtFinishPosition", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(finishPosition >= FinishPositionFirst && finishPosition <= FinishPositionLast, "SearchAlg::isPlayerAtFinishPosition", QString("finishPosition is out of range: %1").arg(static_cast<size_t>(finishPosition)).toStdString().c_str());
+#endif
+
+    const FinistPointData &finishPointData = gFinistPointDataArray[static_cast<size_t>(finishPosition)];
+
+    if (x == finishPointData.x || y == finishPointData.y)
+        return true;
+
+    return false;
+}
+
+
+namespace SearchAlg
+{
+
 
 bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundData *playgroundData, unsigned int stepsCount, PlaygroundCellsMap &stepsMap)
 {
@@ -41,20 +59,15 @@ bool checkFinishRouteRecursive(unsigned char x, unsigned char y, FinishPosition 
     }
 #endif
 
-    const FinistPointData &finishPointData = gFinistPointDataArray[static_cast<size_t>(finishPosition)];
-
-//    if (stepsMap.map[x][y] <= stepsCount)
-//        return false;
-
     stepsMap.map[x][y] = stepsCount;
 
     // delete me only for testing
-//    gWidget->showRoute(x, y, finishPosition, borderMap, &stepsMap);
+//    gWidget->showRoute(x, y, finishPosition, playgroundData, &stepsMap);
 //    QMessageBox msgBox;
 //    msgBox.setText("The document has been modified.");
 //    msgBox.exec();
 
-    if (x == finishPointData.x || y == finishPointData.y)
+    if (isPlayerAtFinishPositionPri(x, y, finishPosition))
         return true;
 
     bool bRes = false;
@@ -104,6 +117,7 @@ bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, Fi
 
     // delete me only for testing
 //    gWidget = new CPlaygroundWidget(0);
+//    gWidget->move(0, 0);
 //    gWidget->show();
 
     bRes = checkFinishRouteRecursive(x, y, finishPosition, data, 0, stepsMap);
@@ -117,5 +131,18 @@ bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, Fi
     return bRes;
 }
 
+
+
+bool isPlayerAtFinishPosition(const GameData *gameData, uint playerIndex)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(gameData);
+    Q_ASSERT_X(playerIndex < PlayerDataDefines::PlayerCount, "SearchAlg::isPlayerAtFinishPosition", "Player is out of range");
+#endif
+
+    const PlayerData player = gameData->players[playerIndex];
+
+    return isPlayerAtFinishPositionPri(player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+}
 
 }

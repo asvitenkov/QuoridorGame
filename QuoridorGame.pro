@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     datautils.cpp \
     gamedatahash.cpp \
     searchalg.cpp \
-    playgroundwidget.cpp
+    playgroundwidget.cpp \
+    gamealg.cpp
 
 HEADERS += \
     structures.h \
@@ -34,7 +35,8 @@ HEADERS += \
     gamedatahash.h \
     datautilsinl.h \
     searchalg.h \
-    playgroundwidget.h
+    playgroundwidget.h \
+    gamealg.h
 
 FORMS += \
     playgroundwidget.ui

@@ -26,6 +26,10 @@ public:
     void showAvaliablePlayerActions(const GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions);
     void showGame(const GameData *gameData);
 
+
+    static void showGameStatic(const GameData *gameData);
+    static void showGameChangesStatic(const GameData *gameData);
+
 private:
     enum Defines
     {

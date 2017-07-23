@@ -17,7 +17,7 @@ public:
 
     static CGameDataHashTable& instance() { return m_instance; }
 
-    void insert(GameData *data);
+    void insert(const GameData *data);
     bool find(GameData * const &data);
 
 
