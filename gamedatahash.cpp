@@ -16,6 +16,17 @@ typedef std::set<GameData*, GameDataComparator> TGameDataHash;
 class CGameDataHashTablePrivate
 {
 public:
+    ~CGameDataHashTablePrivate()
+    {
+        TGameDataHash::iterator it = m_hash.begin();
+
+        while (it != m_hash.end())
+        {
+            delete (*it);
+            ++it;
+        }
+    }
+
     TGameDataHash m_hash;
 };
 
@@ -30,6 +41,11 @@ CGameDataHashTable::CGameDataHashTable()
 
 {
 
+}
+
+CGameDataHashTable::~CGameDataHashTable()
+{
+    delete m_hashTable;
 }
 
 
@@ -55,10 +71,6 @@ bool CGameDataHashTable::find(GameData* const &data)
     const TGameDataHash &hash = m_hashTable->m_hash;
 
     TGameDataHash::const_iterator it =  hash.find(data);
-
-    //delete me
-//    if (it != hash.end())
-//        qDebug() << "find true";
 
     return it != hash.end();
 }

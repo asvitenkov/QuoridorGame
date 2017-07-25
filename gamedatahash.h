@@ -16,6 +16,7 @@ class CGameDataHashTable
 public:
 
     static CGameDataHashTable& instance() { return m_instance; }
+    ~CGameDataHashTable();
 
     void insert(const GameData *data);
     bool find(GameData * const &data);
