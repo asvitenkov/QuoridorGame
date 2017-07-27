@@ -203,7 +203,7 @@ namespace PlaygroundDataInl
 //    return map;
 //}
 
-inline bool canPlayerMooveTo(PlaygroundData *data, unsigned char x, unsigned char y, bool horizontal, bool positive)
+inline bool canPlayerMooveTo(const PlaygroundData *data, unsigned char x, unsigned char y, bool horizontal, bool positive)
 {
 #ifdef ENABLE_PARAMS_CHECKING
     Q_CHECK_PTR(data);

@@ -30,7 +30,7 @@ void processGameStateRec(GameData *gameData, quint64 *totalGamesCount, quint64 *
 //    static size_t count = 0;
 //    static size_t max_count = 500000;
 //    if (++count >= max_count && (count % 100000 == 0))
-//        CPlaygroundWidget::showGameChangesStatic(gameData);
+        CPlaygroundWidget::showGameChangesStatic(gameData);
 
     // only for 4 players game
 

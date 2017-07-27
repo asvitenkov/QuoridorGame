@@ -21,7 +21,7 @@ public:
     explicit CPlaygroundWidget(QWidget *parent = 0);
     ~CPlaygroundWidget();
 
-    void showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap);
+    void showRoute(unsigned char x, unsigned char y, FinishPosition position, const PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap);
     void showAvaliableBorderPosition(const PlaygroundData *playgroundData, const std::list<PlayerActionAddBorder*> &actions);
     void showAvaliablePlayerActions(const GameData *gameData, uint playerIndex, const std::list<IPlayerAction*> &actions);
     void showGame(const GameData *gameData);

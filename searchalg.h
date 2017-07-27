@@ -10,6 +10,8 @@ bool checkFinishRoute(PlaygroundData *data, unsigned char x, unsigned char y, Fi
 
 bool isPlayerAtFinishPosition(const GameData *gameData, uint playerIndex);
 
+void fillMoovmeentsCellsMap(const PlaygroundData *data, unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundCellsMap &map);
+
 }
 
 

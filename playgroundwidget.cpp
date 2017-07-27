@@ -259,7 +259,7 @@ void CPlaygroundWidget::showGame(const GameData *gameData)
     readBordersFromPlaygroundData(&gameData->playground);
 }
 
-void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPosition position, PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap)
+void CPlaygroundWidget::showRoute(unsigned char x, unsigned char y, FinishPosition position, const PlaygroundData *playgroundData, PlaygroundCellsMap *stepsMap)
 {
 
 #ifdef ENABLE_PARAMS_CHECKING
@@ -500,15 +500,6 @@ void CPlaygroundWidget::resetPlayground()
 
 void CPlaygroundWidget::showGameStatic(const GameData *gameData)
 {
-//    CPlaygroundWidget *pWidget = new CPlaygroundWidget;
-//    pWidget->show();
-//    pWidget->move(0,0);
-//    pWidget->showGame(gameData);
-//    QMessageBox msgBox;
-//    msgBox.setText("");
-//    msgBox.exec();
-//    delete pWidget;
-
     static CPlaygroundWidget pWidget;
     pWidget.show();
     pWidget.move(0,0);

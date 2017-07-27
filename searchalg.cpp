@@ -4,6 +4,7 @@
 #include "playgroundwidget.h"
 
 #include <QtGlobal>
+#include <QMessageBox>
 
 //delete me
 //#include <QMessageBox>
@@ -143,6 +144,72 @@ bool isPlayerAtFinishPosition(const GameData *gameData, uint playerIndex)
     const PlayerData player = gameData->players[playerIndex];
 
     return isPlayerAtFinishPositionPri(player.x, player.y, static_cast<FinishPosition>(player.finishPosition));
+}
+
+
+void fillCellsMapRec(const PlaygroundData *playgroundData, unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundCellsMap &map, unsigned int stepsCount)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(playgroundData);
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(finishPosition >= FinishPositionFirst && finishPosition <= FinishPositionLast, "SearchAlg::checkFinishRoute", QString("finishPosition is out of range: %1").arg(static_cast<size_t>(finishPosition)).toStdString().c_str());
+
+    if (finishPosition < FinishPositionFirst || finishPosition > FinishPositionLast)
+    {
+        qCritical() << "SearchAlg::checkFinishRouteRecursive error: finishPosition is out of range - " << (unsigned char) finishPosition;
+        return;
+    }
+#endif
+
+    if (map.map[x][y] < stepsCount)
+        return;
+
+    map.map[x][y] = stepsCount;
+
+    if (isPlayerAtFinishPositionPri(x, y, finishPosition))
+        return;
+
+    bool bRes = false;
+
+    // up
+    if (y - 1 >= 0 && map.map[x][y - 1] > stepsCount + 1
+            && PlaygroundDataInl::canPlayerMooveTo(playgroundData, x, y, false, false))
+        fillCellsMapRec(playgroundData, x, y - 1, finishPosition, map, stepsCount + 1);
+
+    // right
+    if (x + 1 < PlaygroundLinesDataDefines::PlaygroundSize
+            && map.map[x + 1][y] > stepsCount + 1
+            && PlaygroundDataInl::canPlayerMooveTo(playgroundData, x, y, true, true))
+        fillCellsMapRec(playgroundData, x + 1, y, finishPosition, map, stepsCount + 1);
+
+    // down
+    if (!bRes && y + 1 < PlaygroundLinesDataDefines::PlaygroundSize
+            && map.map[x][y + 1] > stepsCount + 1
+            && PlaygroundDataInl::canPlayerMooveTo(playgroundData, x, y, false, true))
+        fillCellsMapRec(playgroundData, x, y + 1, finishPosition, map, stepsCount + 1);
+
+    // left
+    if (x - 1 >=0 && map.map[x - 1][y] > stepsCount + 1
+            && PlaygroundDataInl::canPlayerMooveTo(playgroundData, x, y, true, false))
+        fillCellsMapRec(playgroundData, x -1, y, finishPosition, map, stepsCount + 1);
+
+}
+
+
+
+void fillMoovmeentsCellsMap(const PlaygroundData *data, unsigned char x, unsigned char y, FinishPosition finishPosition, PlaygroundCellsMap &map)
+{
+#ifdef ENABLE_PARAMS_CHECKING
+    Q_CHECK_PTR(data);
+    Q_ASSERT_X(x < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("x coord is out of range: %1").arg(x).toStdString().c_str());
+    Q_ASSERT_X(y < PlaygroundLinesDataDefines::PlaygroundSize, "SearchAlg::checkFinishRoute", QString("y coord is out of range: %1").arg(y).toStdString().c_str());
+    Q_ASSERT_X(finishPosition >= FinishPositionFirst && finishPosition <= FinishPositionLast, "SearchAlg::checkFinishRoute", QString("finishPosition is out of range: %1").arg(static_cast<size_t>(finishPosition)).toStdString().c_str());
+#endif
+
+    memset(&map, 255, sizeof(PlaygroundCellsMap));
+
+    fillCellsMapRec(data, x, y, finishPosition, map, 0);
 }
 
 }
